@@ -1,5 +1,5 @@
 # DEADLINE
-6th of Octobe 2023, 5pm.
+6th of October 2023, 5pm.
 
 # Project Goals
 Documentation:

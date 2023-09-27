@@ -1,5 +1,5 @@
 # 17:31
-- I have recieved a basic [design document](https://github.com/jayfalls/log_file_analyser/thoughts/documents/design_document.md) for a log analyser from Lytehouse.
+- I have recieved a basic [design document](https://github.com/jayfalls/log_file_analyser/blob/main/thoughts/documents/design_document.md) for a log analyser from Lytehouse.
 - I just created this github repo and layed out the basic file structure.
 
 # 17:36
