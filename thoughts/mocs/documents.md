@@ -10,3 +10,4 @@
 
 - [Game Plan](../documents/game_plan.md)
 - [Functional Breakdown](../documents/functional_breakdown.md)
+- [AGILE](../documents/agile.md)
