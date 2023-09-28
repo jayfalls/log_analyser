@@ -1,6 +1,6 @@
 ##### up:: [DOCUMENTS](../mocs/documents.md)
 
-##### related:: [First Day](../days/28Sept2023.md)
+##### related:: [First Day](../days/28Sept2023.md) [Functional Breakdown](./functional_breakdown.md)
 
 # Design Document
 
