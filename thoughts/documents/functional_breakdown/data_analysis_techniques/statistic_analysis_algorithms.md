@@ -2,8 +2,6 @@ up:: [Possible Solutions](../possible_solutions.md)
 
 # Statistic Analysis Algorithms
 
-
-
 1. **Hypothesis Testing:**
    
    - A framework for making decisions or inferences about a population based on sample data.
