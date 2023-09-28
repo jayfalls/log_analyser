@@ -13,7 +13,13 @@ This serves to document my thought processes during the creation of this project
     *Recieved the task from Lytehouse, did some pre-planning*
   
   - [*SECOND DAY*](./days/28Sept2023.md)
+    
+    *Created the Functional Breakdown and AGILE documents*
 
 - [**DOCUMENTS**](./mocs/documents.md)
+  
+  - [AGILE](./documents/agile.md)
 
 - [**SENTIMENTS**](./mocs/sentiments.md)
+  
+  - [Lessons Learned](./sentiments/lessons.md)
