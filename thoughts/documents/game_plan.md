@@ -24,7 +24,7 @@ I will use the agile framework, adapted to solo development, to produce as high 
 
 - I will assign a working period of 5 hours a day maximum. 
   
-  - Between 12:00pm to17:00pm
+  - Between 12:00pm to 17:00pm
 
 - I will spend up to an hour every morning before 09:00am to finish previous day spillover and to mitigate gathering debt from incomplete tasks
 

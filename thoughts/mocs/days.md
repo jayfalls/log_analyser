@@ -6,4 +6,4 @@
 
 ## Week 1
 
-- [Tuesday](../days/28Sept2023.md)
+- [Wednesday](../days/28Sept2023.md)

@@ -1,5 +1,5 @@
 # Log Analyser
 
-A python program to parse and analyse the log file to with the goal of uncovering valuable insights, with documentation of thought.
+A python program to parse and analyse a log file with the goal of uncovering valuable insights, including documentation of thought.
 
 ## [Thought DOCS](./thoughts/THOUGHTS.md)
