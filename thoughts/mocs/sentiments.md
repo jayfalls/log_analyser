@@ -9,3 +9,5 @@
 - [Things I Found Hard](../sentiments/hard_stuff.md)
 
 - [New Things I Learned](../sentiments/learned_stuff.md)
+
+- [Lessons Learned](../sentiments/lessons.md)

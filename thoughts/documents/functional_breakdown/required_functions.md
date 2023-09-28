@@ -4,6 +4,16 @@ up:: [Functional Breakdown](../functional_breakdown.md)
 
 # Required Functions
 
+## User Interaction
+
+- Terminal mode for development and testing
+
+- GUI
+  
+  - Drag and Drop
+  
+  - Should be frontend, to allow for other tools to use the same gui.
+
 ## Log Analysis
 
 - Log Parsing
