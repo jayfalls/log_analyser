@@ -1,6 +1,6 @@
 ##### up:: [THOUGHTS](../THOUGHTS.md)
 
-# Documents
+# 📁 Documents
 
 ## External
 

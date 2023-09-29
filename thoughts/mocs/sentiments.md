@@ -2,7 +2,7 @@
 
 ##### related:: [DAYS](./days.md)
 
-# Sentiments
+# 🧠 Sentiments
 
 - [Things I Found Easy](../sentiments/easy_stuff.md)
 

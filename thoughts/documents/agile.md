@@ -38,19 +38,19 @@
 - Develop a script in Python to parse the log file.
 - Implement log type frequency calculation.
 
-#### Phase 2: Advanced Analysis and Temporal Trends (By 2nd Oct)
+#### Phase 2: Pattern Analysis and Temporal Trends (By 2nd Oct)
 
 - Identify recurring error or warning patterns.
-- Analyze temporal trends, e.g., specific errors at certain times/days.
+- Analyse temporal trends, e.g., specific errors at certain times/days.
 
 #### Phase 3: Anomaly Detection and Data Visualization (By 5th Oct)
 
 - Implement anomaly detection for unexpected spikes in log frequencies.
-- Generate visualizations: log frequency histogram and time series graph.
+- Generate visualisations: log frequency histogram and time series graph.
 
 #### Phase 4: Refinement and Multi-Day Analysis (By 6th Oct)
 
 - Amend the script to handle multiple log files spanning multiple days.
-- Optimize the code for efficiency and reliability.
+- Optimise the code for efficiency and reliability.
 
 # [Kanban Board](https://tree.taiga.io/project/jayfalls-log-analyser/kanban)

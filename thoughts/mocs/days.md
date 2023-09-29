@@ -2,7 +2,7 @@
 
 ##### related:: [SENTIMENTS](./sentiments.md)
 
-# Days
+# 📆 Days
 
 ## Week 1
 
