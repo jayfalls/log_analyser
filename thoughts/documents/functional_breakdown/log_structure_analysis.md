@@ -29,9 +29,9 @@ Based on the information provided in the context, here are the key insights and 
 
 To extract this information into a database for further analysis, you can consider creating a table with the following columns:
 
-- `log_id`: Unique identifier for each log entry.
-- `timestamp`: Date and time of the event.
+- `log_id`: Identifier for where the log comes from.
 - `log_type`: Type of log message (e.g., [ERROR], [STACKTRACE]).
+- `source`: Sourch repository/module/function that the log comes from
+- `date`: Date of the event.
+- `time`: Time of the event.
 - `message`: Detailed error message or stack trace.
-- `node_id`: Node ID associated with the failed connection (if applicable).
-- `queue_id`: Queue ID mentioned in the error message or stack trace (if applicable).
