@@ -8,9 +8,9 @@
 A python program to ***parse and analyse*** a log file with the goal of uncovering valuable insights, including *documentation of thought*.
 
 <h2 align="center">
-    <a href="./thoughts/THOUGHTS.md">📝 Documentation</a>
+    <a href="./thoughts/THOUGHTS.md" target="_blank">📝 Documentation</a>
 </h2>
 
 <h2 align="center">
-    <a href="https://tree.taiga.io/project/jayfalls-log-analyser/kanban">📜 Track My Progress</a>
+    <a href="https://tree.taiga.io/project/jayfalls-log-analyser/kanban" target="_blank">📜 Track My Progress</a>
 </h2>
