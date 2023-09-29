@@ -29,34 +29,42 @@ test_log_path: str = ".test_files/API2023_09_27.txt"
 
 
 # ERROR HANDLING
-def print_sql_error(e) -> None:
-    print(f"An error occurred while initializing the database: {e}")
+def handle_sql_error(error: sqlite3.Error) -> None:
+    error_message = str(error)
+    if "UNIQUE constraint failed" in error_message:
+        print("Error: Unique constraint violated.")
+    elif "FOREIGN KEY constraint failed" in error_message:
+        print("Error: Foreign key constraint violated.")
+    else:
+        print("An error occurred while initializing the database:", error_message)
+
 
 # DATABASE
 async def initialise_database() -> sqlite3.Connection:
     try:
-        db_connection = sqlite3.connect(DATABASE_PATH)
-        db_cursor: sqlite3.Cursor = db_connection.cursor()
+        # Use context manager to automatically close the connection
+        with sqlite3.connect(DATABASE_PATH) as database_connection:
+            database_cursor: sqlite3.Cursor = database_connection.cursor()
 
-        # Create the table
-        tables: str = " TEXT TRUE, ".join([str(table) for table in DATABASE_TABLE_NAMES])
-        db_cursor.execute(f"CREATE TABLE IF NOT EXISTS {DATABASE_TABLE_NAME} ({tables})")
-        commit_to_database(db_connection)
+            # Create the table
+            tables: str = " TEXT TRUE, ".join([str(table) for table in DATABASE_TABLE_NAMES])
+            database_cursor.execute(f"CREATE TABLE IF NOT EXISTS {DATABASE_TABLE_NAME} ({tables})")
+            commit_to_database(database_connection)
 
-        return db_connection
+            return database_connection
     except sqlite3.Error as error:
-        print_sql_error(error)
+        handle_sql_error(error)
         return None
 
-def commit_to_database(db_connection: sqlite3.Connection) -> None:
+def commit_to_database(database_connection: sqlite3.Connection) -> None:
     try:
-        db_connection.commit()
+        database_connection.commit()
     except sqlite3.Error as error:
-        print_sql_error(error)
+        handle_sql_error(error)
 
-def check_if_entry_exists(db_connection: sqlite3.Connection, log_line: dict) -> bool:
+def check_if_entry_exists(database_connection: sqlite3.Connection, log_line: dict) -> bool:
     try:
-        db_cursor: sqlite3.Cursor = db_connection.cursor()
+        database_cursor: sqlite3.Cursor = database_connection.cursor()
 
         # Extract log_id, log_type, and time from log_line
         log_id: str = log_line.get("log_id")
@@ -64,33 +72,33 @@ def check_if_entry_exists(db_connection: sqlite3.Connection, log_line: dict) -> 
         time: str = log_line.get("time")
 
         # Check if the data already exists in the database based on log_id, log_type, and time
-        db_cursor.execute(f"SELECT log_id FROM {DATABASE_TABLE_NAME} WHERE log_id = ? AND log_type = ? AND time = ?", (log_id, log_type, time))
-        does_exist: bool = db_cursor.fetchone()
+        database_cursor.execute(f"SELECT log_id FROM {DATABASE_TABLE_NAME} WHERE log_id = ? AND log_type = ? AND time = ?", (log_id, log_type, time))
+        does_exist: bool = database_cursor.fetchone()
 
         return does_exist
     except sqlite3.Error as error:
-        print_sql_error(error)
+        handle_sql_error(error)
         return False
 
-def write_line_to_database(db_connection: sqlite3.Connection, log_line: dict) -> None:
+def write_line_to_database(database_connection: sqlite3.Connection, log_line: dict) -> None:
     try:
-        if check_if_entry_exists(db_connection, log_line):
+        if check_if_entry_exists(database_connection, log_line):
             return
 
-        db_cursor: sqlite3.Cursor = db_connection.cursor()
+        database_cursor: sqlite3.Cursor = database_connection.cursor()
         # Insert the data into the table
         tables_string: str = ", ".join(str(table) for table in DATABASE_TABLE_NAMES)
         values_string: str = ", ".join([f":{str(table)}" for table in DATABASE_TABLE_NAMES])
-        db_cursor.execute(f"INSERT INTO {DATABASE_TABLE_NAME} ({tables_string}) VALUES ({values_string})", log_line)
+        database_cursor.execute(f"INSERT INTO {DATABASE_TABLE_NAME} ({tables_string}) VALUES ({values_string})", log_line)
     except sqlite3.Error as error:
-        print_sql_error(error)
+        handle_sql_error(error)
         return False
 
-def close_database(db_connection: sqlite3.Connection) -> None:
+def close_database(database_connection: sqlite3.Connection) -> None:
     try:
-        db_connection.close()
+        database_connection.close()
     except sqlite3.Error as error:
-        print_sql_error(error)
+        handle_sql_error(error)
         return False
 
 
@@ -114,11 +122,11 @@ async def clean_log_file(log_path: str) -> str:
         return LOG_FILE_ERRORS[LOG_FILE_ERROR_NAMES.IO_ERROR]
 
 
-# PARSING
+# EXTRACTING
 def split_log_line(log_line: str) -> list:
     return log_line.split(" | ")
 
-def parse_log_line(log_line: str) -> dict:
+def extract_log_line(log_line: str) -> dict:
     items: list = split_log_line(log_line)
 
     if len(items) != 5:
@@ -150,44 +158,35 @@ def parse_log_line(log_line: str) -> dict:
         "message": message,
     }
 
-async def parse_log_to_database(db_connection, logs: str) -> None:
+async def extract_log_to_database(database_connection, logs: str) -> None:
     loop = asyncio.get_event_loop()
     for log_line in logs.splitlines():
-        log_line_seperated: dict = parse_log_line(log_line)
-        if log_line_seperated == None:
-            return
-        write_line_to_database(db_connection, log_line_seperated)
-    commit_to_database(db_connection)   
-
-async def parse_log_to_database(db_connection, logs: str) -> None:
-    loop = asyncio.get_event_loop()
-    for log_line in logs.splitlines():
-        log_line_separated: dict = parse_log_line(log_line)
+        log_line_separated: dict = extract_log_line(log_line)
         if log_line_separated is None:
-            print("Error: Failed to parse log line:", log_line)
+            print("Error: Failed to extract log line:", log_line)
             continue
         try:
-            write_line_to_database(db_connection, log_line_separated)
+            write_line_to_database(database_connection, log_line_separated)
         except Exception as e:
             print("Error occurred while writing log line to database:", log_line)
             print("Error message:", str(e))
             continue
-    commit_to_database(db_connection)
+    commit_to_database(database_connection)
 
 
 # PROGRAM START
 async def start() -> None:
-    db_connection = await initialise_database()
+    database_connection = await initialise_database()
     logs: str = await clean_log_file(test_log_path)
     if logs in LOG_FILE_ERRORS:
         print(logs)
         return
-    await parse_log_to_database(db_connection, logs)
-    close_database(db_connection)
+    await extract_log_to_database(database_connection, logs)
+    close_database(database_connection)
 
 async def start() -> None:
-    db_connection = await initialise_database()
-    if db_connection is None:
+    database_connection = await initialise_database()
+    if database_connection is None:
         print("Error: Failed to initialize the database.")
         return
 
@@ -197,14 +196,14 @@ async def start() -> None:
         return
 
     try:
-        await parse_log_to_database(db_connection, logs)
+        await extract_log_to_database(database_connection, logs)
     except Exception as e:
         print("Error occurred while parsing logs to the database:")
         print("Error message:", str(e))
-        close_database(db_connection)
+        close_database(database_connection)
         return
 
-    close_database(db_connection)
+    close_database(database_connection)
 
 
 asyncio.run(start())

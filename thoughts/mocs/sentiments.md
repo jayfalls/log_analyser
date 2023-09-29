@@ -11,3 +11,5 @@
 - [New Things I Learned](../sentiments/learned_stuff.md)
 
 - [Lessons Learned](../sentiments/lessons.md)
+
+- [Future Considerations](../future_considerations.md)
