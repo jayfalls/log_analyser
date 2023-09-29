@@ -1,4 +1,4 @@
-up:: [Functional Breakdown](../functional_breakdown.md)
+##### up:: [Functional Breakdown](../functional_breakdown.md)
 
 ##### related:: [Possible Solutions](./possible_solutions.md)
 

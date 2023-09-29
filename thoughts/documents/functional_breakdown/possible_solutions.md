@@ -1,4 +1,4 @@
-up:: [Functional Breakdown](../functional_breakdown.md)
+##### up:: [Functional Breakdown](../functional_breakdown.md)
 
 ##### related:: [Required Functions](./required_functions.md)
 

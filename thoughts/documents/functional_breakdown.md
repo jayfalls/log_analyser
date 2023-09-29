@@ -19,3 +19,5 @@ This document aims to conceptualise how the program could be built, including:
 ## [Required Functions](./functional_breakdown/required_functions.md)
 
 ## [Possible Solutions](./functional_breakdown/possible_solutions.md)
+
+## [Log Structure Analysis](./functional_breakdown/log_structure_analysis.md)

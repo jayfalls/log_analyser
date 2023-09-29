@@ -1,4 +1,4 @@
-up:: [Functional Breakdown](../functional_breakdown.md)
+##### up:: [Functional Breakdown](../functional_breakdown.md)
 
 ##### related:: [Third Day](../days/29Sept2023.md)
 
@@ -31,5 +31,3 @@ The deadline is tight, and I am inexperienced in making this type of program. Th
 - Don't worry too much about Big O
 
 - Don't worry too much about edge-cases
-
-- 
