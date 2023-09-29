@@ -6,13 +6,11 @@ up:: [Functional Breakdown](../functional_breakdown.md)
 
 ## User Interaction
 
-- Terminal mode for development and testing
-
 - GUI
-  
-  - Drag and Drop
-  
-  - Should be frontend, to allow for other tools to use the same gui.
+
+- Drag and Drop
+
+- Should be frontend, to allow for other tools to use the same gui.
 
 ## Log Analysis
 

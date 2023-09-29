@@ -10,7 +10,28 @@
 2. **Visual:** Must have a gui and graphs
 3. **Design Doc:** Must fullfill all requirements laid out by the [Design Document](./design_document.md)
 
+# Continuous Documentation
+
+- Document progress daily, detailing challenges, successes, and optimization ideas.
+- Update documentation for each function and solution implemented.
+
+# Build Process
+
+- Focus on getting it to work first, worry about optimisations(Architecture, Big O, etc) later.
+
+- Build it as a backend, not a standalone app.
+
+# Testing
+
+- After finishing each unit in a phase, write out tests for it, this is included in the time for each phase.
+
 # Development Phases
+
+#### Phase 0.5: GUI Frontend (By 6th Oct)
+
+- Build a frontend GUI
+
+- Implement drag & drop functionality
 
 #### Phase 1: Log Parsing and Basic Analysis (By 29th Sept)
 
@@ -32,13 +53,4 @@
 - Amend the script to handle multiple log files spanning multiple days.
 - Optimize the code for efficiency and reliability.
 
-# Continuous Documentation
-
-- Document progress daily, detailing challenges, successes, and optimization ideas.
-- Update documentation for each function and solution implemented.
-
-# Testing
-
-- After finishing each unit in a phase, write out tests for it, this is included in the time for each phase
-
-# Kanban Board [Taiga](https://taiga.io)
+# [Kanban Board](https://tree.taiga.io/project/jayfalls-log-analyser/kanban)

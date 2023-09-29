@@ -8,11 +8,13 @@
 
 This document aims to conceptualise how the program could be built, including:
 
-- Layout
+- Rules to follow when building
 
-- Tools to Use
+- All the basic functions needed by the program
 
-- Methods for solving requirements
+- Potential methods for solving requirements
+
+## [Design Rules](./functional_breakdown/design_rules.md)
 
 ## [Required Functions](./functional_breakdown/required_functions.md)
 
