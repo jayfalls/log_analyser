@@ -1,19 +1,19 @@
 import asyncio
 import sqlite3
-from tests import default_tests
 
 
 # VARIABLES
 ## Constants
 DATABASE_PATH: str = "api_logs.db"
-DATABASE_TABLES: set = {
-    "log_id TEXT", 
-    "log_type TEXT",
-    "source TEXT",
-    "date TEXT",
-    "time TEXT", 
-    "message TEXT"
-    }
+DATABASE_TABLE_NAME: str = "api_logs"
+DATABASE_TABLE_NAMES: tuple = (
+    "log_id", 
+    "log_type",
+    "source",
+    "date",
+    "time", 
+    "message"
+)
 
 ## Temp
 test_log_path: str = ".test_files/API2023_09_27.txt"
@@ -25,12 +25,39 @@ async def initialise_database():
     db_cursor = db_connection.cursor()
 
     # Create the table
-    tables: str = ", ".join([str(table) for table in DATABASE_TABLES])
-    db_cursor.execute(f"CREATE TABLE IF NOT EXISTS api_logs ({tables})")
-    db_connection.commit()
+    tables: str = " TEXT TRUE, ".join([str(table) for table in DATABASE_TABLE_NAMES])
+    db_cursor.execute(f"CREATE TABLE IF NOT EXISTS {DATABASE_TABLE_NAME} ({tables})")
+    commit_to_database(db_connection)
 
     return db_connection    
     db_connection.close()
+
+def commit_to_database(db_connection) -> None:
+    db_connection.commit()
+
+def check_if_entry_exists(db_connection, log_line: dict) -> bool:
+    db_cursor = db_connection.cursor()
+
+    # Extract log_id, log_type, and time from log_line
+    log_id: str = log_line.get("log_id")
+    log_type: str = log_line.get("log_type")
+    time: str = log_line.get("time")
+
+    # Check if the data already exists in the database based on log_id, log_type, and time
+    db_cursor.execute(f"SELECT log_id FROM {DATABASE_TABLE_NAME} WHERE log_id = ? AND log_type = ? AND time = ?", (log_id, log_type, time))
+    does_exist: bool = db_cursor.fetchone()
+
+    return does_exist
+
+def write_line_to_database(db_connection, log_line: dict) -> None:
+    if check_if_entry_exists(db_connection, log_line):
+        return
+    
+    db_cursor = db_connection.cursor()
+    # Insert the data into the table
+    tables_string: str = ", ".join(str(table) for table in DATABASE_TABLE_NAMES)
+    values_string: str = ", ".join([f":{str(table)}" for table in DATABASE_TABLE_NAMES])
+    db_cursor.execute(f"INSERT INTO {DATABASE_TABLE_NAME} ({tables_string}) VALUES ({values_string})", log_line)
 
 
 # Loading Files
@@ -41,6 +68,8 @@ async def clean_log_file(log_path: str) -> str:
             loop = asyncio.get_event_loop()
             tasks = []
             for line in log_file:
+                if len(line) < 20: # Shouldn't be using a random number here, this is to make sure no empty lines are added
+                    continue
                 if "[REPORTING]" not in line:
                    valid_logs += line
             return valid_logs
@@ -71,14 +100,19 @@ def parse_log_line(log_line: str) -> dict:
         "message": message,
     }
 
+async def parse_log_to_database(db_connection, logs: str) -> None:
+    loop = asyncio.get_event_loop()
+    for log_line in logs.splitlines():
+        log_line_seperated: dict = parse_log_line(log_line)
+        write_line_to_database(db_connection, log_line_seperated)
+    commit_to_database(db_connection)   
+
 
 # PROGRAM START
 async def start() -> None:
     db_connection = await initialise_database()
     logs: str = await clean_log_file(test_log_path)
-    for log_line in logs.splitlines():
-        print(parse_log_line(log_line))
-        break
+    await parse_log_to_database(db_connection, logs)
 
 
 asyncio.run(start())
