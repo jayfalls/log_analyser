@@ -6,7 +6,7 @@ This serves to document my thought processes during the creation of this project
 
 # 🌍 Map 🌍
 
-- ## 📆 [DAYS](./mocs/days.md)
+- ## 🗓️ [DAYS](./mocs/days.md)
   
   - [FIRST DAY](./days/27Sept2023.md)
     
@@ -20,11 +20,11 @@ This serves to document my thought processes during the creation of this project
     
     *Started building the project*
 
-- ## 📁 [DOCUMENTS](./mocs/documents.md)
+- ## 🗄️ [DOCUMENTS](./mocs/documents.md)
   
   - [AGILE](./documents/agile.md)
   - [Implementation](./documents/implementation.md)
 
-- ## 🧠 [SENTIMENTS](./mocs/sentiments.md)
+- ## 🗨️ [SENTIMENTS](./mocs/sentiments.md)
   
   - [Lessons Learned](./sentiments/lessons.md)
