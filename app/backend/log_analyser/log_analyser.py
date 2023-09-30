@@ -6,9 +6,16 @@ from .components.sql_log import SQL_Log
 from .components.log_to_db import LogToDatabase
 
 
+# VARIABLES
+## States
+debug_mode: bool = False
+
+
 # PROGRAM START
 async def run_log_analyser(log_path: str) -> None:
     log_database: SQL_Log = SQL_Log()
+    if debug_mode:
+        log_database.debug_mode = True
     log_database_error_check = await log_database.initialise_database()
     if log_database_error_check is None:
         raise Exception("Error: Failed to initialize the database.")

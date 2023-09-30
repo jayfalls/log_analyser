@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from enum import Enum
 import sqlite3
 import sys
@@ -17,11 +18,20 @@ class LOG_FILE_ERROR_NAMES(Enum):
     FILE_NOT_FOUND: int = 0
     IO_ERROR: int = 1
 
+
+# HELPER FUNCTIONS
+def is_string_empty_or_whitespace(string: str) -> bool:
+    return len(string.strip()) == 0
+
+
+# LOG TO DATABASE
 class LogToDatabase():
     # LOADING FILES
     @staticmethod
     async def clean_log_file(log_path: str) -> str:
         valid_logs: str = ""
+        if not log_path.endswith('.log'):
+            raise TypeError("Invalid file type. Only .log files are supported.")
         try:
             with open(log_path, 'r') as log_file:
                 for line in log_file:
@@ -47,6 +57,9 @@ class LogToDatabase():
 
         if len(items) != 5:
             return None
+        for item in items:
+            if is_string_empty_or_whitespace(item):
+                return None
 
         # If log_id isn't seperated by an api call, return error
         log_id_parts: tuple = items[0].split(":")
@@ -62,6 +75,12 @@ class LogToDatabase():
         if len(date_time_parts) != 2:
             return None
         date, time = date_time_parts
+        try:
+            datetime.strptime(date, "%Y-%m-%d")
+            datetime.strptime(time, "%H:%M:%S.%f")
+        except ValueError as error:
+            raise error
+            return None
 
         message: str = items[4]
 
@@ -93,6 +112,9 @@ class LogToDatabase():
         logs: str = await self.clean_log_file(path_to_log)
         if logs in LOG_FILE_ERRORS:
             print(logs)
+            return
+        if len(logs) < 1:
+            print("There are no valid logs in this log file.\n")
             return
         try:
             await self.extract_log_to_database(log_database, logs)
