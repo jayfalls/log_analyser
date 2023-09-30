@@ -3,28 +3,21 @@ from enum import Enum
 import sqlite3
 import sys
 import os
-# IMPORT LOCALLY
-## Get the directory path of the current script
-current_script_dir: str = os.path.dirname(os.path.abspath(__file__))
-## Get the parent directory path
-parent_dir: str = os.path.dirname(current_script_dir)
-## Add the parent directory to the import path
-sys.path.append(parent_dir)
-from components.sql_log import SQL_Log
+from ..components.sql_log import SQL_Log
 
+
+# VARIABLES
+## Constants
+### Errors
+LOG_FILE_ERRORS: tuple = (
+    "Log file does not exist",
+    "Error occurred while reading the log file."
+)
+class LOG_FILE_ERROR_NAMES(Enum):
+    FILE_NOT_FOUND: int = 0
+    IO_ERROR: int = 1
 
 class LogToDatabase():
-    # VARIABLES
-    ## Constants
-    ### Errors
-    LOG_FILE_ERRORS: tuple = (
-        "Log File does not exist",
-        "Error occurred while reading the log file."
-    )
-    class LOG_FILE_ERROR_NAMES(Enum):
-        FILE_NOT_FOUND = 0
-        IO_ERROR = 1
-
     # LOADING FILES
     @staticmethod
     async def clean_log_file(log_path: str) -> str:
@@ -35,15 +28,17 @@ class LogToDatabase():
                     line = line.strip()
                     if not line:
                         continue
-                    if len(line) < 5: # I really shouldn't be using a random number here, but this is to make sure no empty lines are added
+                    if len(line) < 20: # I really shouldn't be using a random number here, but this is to make sure no empty lines are added
                         continue
                     if "[REPORTING]" not in line:
                         valid_logs += line + "\n"
                 return valid_logs
         except FileNotFoundError:
-            return self.LOG_FILE_ERRORS[self.LOG_FILE_ERROR_NAMES.FILE_NOT_FOUND]
+            raise FileNotFoundError
+            return LOG_FILE_ERRORS[LOG_FILE_ERROR_NAMES.FILE_NOT_FOUND.value]
         except IOError:
-            return self.LOG_FILE_ERRORS[self.LOG_FILE_ERROR_NAMES.IO_ERROR]
+            raise IOError
+            return LOG_FILE_ERRORS[LOG_FILE_ERROR_NAMES.IO_ERROR.value]
 
     # EXTRACTING
     @staticmethod
@@ -90,18 +85,19 @@ class LogToDatabase():
             except Exception as error:
                 print("Error occurred while writing log line to database:", log_line)
                 print("Error message:", str(error))
+                raise error
                 continue
         log_database.commit_to_database()
     
     async def log_to_database(self, log_database: SQL_Log, path_to_log: str) -> None:
         logs: str = await self.clean_log_file(path_to_log)
-        if logs in self.LOG_FILE_ERRORS:
+        if logs in LOG_FILE_ERRORS:
             print(logs)
             return
         try:
             await self.extract_log_to_database(log_database, logs)
         except Exception as error:
-            print("Error occurred while parsing logs to the database:")
-            print("Error message:", str(error))
+            print("Error occurred while extracting logs to the database:")
+            raise error
             log_database.close_database()
             return

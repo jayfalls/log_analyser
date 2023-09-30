@@ -49,6 +49,7 @@ class SQL_Log():
 
                 return new_database_connection
         except sqlite3.Error as error:
+            raise error
             self.handle_sql_error(error)
             return None
 
@@ -56,6 +57,7 @@ class SQL_Log():
         try:
             self.database_connection.commit()
         except sqlite3.Error as error:
+            raise error
             self.handle_sql_error(error)
 
     def check_if_entry_exists(self, log_line: dict) -> bool:
@@ -73,6 +75,7 @@ class SQL_Log():
 
             return does_exist
         except sqlite3.Error as error:
+            raise error
             self.handle_sql_error(error)
             return False
 
@@ -87,6 +90,7 @@ class SQL_Log():
             values_string: str = ", ".join([f":{str(table)}" for table in self.DATABASE_TABLE_NAMES])
             database_cursor.execute(f"INSERT INTO {self.DATABASE_TABLE_NAME} ({tables_string}) VALUES ({values_string})", log_line)
         except sqlite3.Error as error:
+            raise error
             self.handle_sql_error(error)
             return False
 
@@ -94,5 +98,6 @@ class SQL_Log():
         try:
             self.database_connection.close()
         except sqlite3.Error as error:
+            raise error
             self.handle_sql_error(error)
             return False

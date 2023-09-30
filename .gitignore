@@ -3,6 +3,7 @@ api_logs.db
 
 # Temporary Files
 .test_files/
+test_results.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
