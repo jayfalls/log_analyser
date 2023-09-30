@@ -4,5 +4,4 @@ import sqlite3
 class Analyser():
     def analyse(self, log_tools) -> tuple:
         frequencies = log_tools.get_log_type_frequencies()
-        print(frequencies)
         return frequencies

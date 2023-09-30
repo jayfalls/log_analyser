@@ -1,6 +1,6 @@
 <p align="center">
-    <img src ="https://img.shields.io/badge/version-0.0.2-brightgreen">
-    <img src="https://img.shields.io/badge/status-not%20functional-red">
+    <img src ="https://img.shields.io/badge/version-0.0.3-brightgreen">
+    <img src="https://img.shields.io/badge/status-semi%20functional-orange">
 </p>
 
 <h1 align="center">🗒️ Log Analyser 🗒️</h1>

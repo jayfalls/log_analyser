@@ -36,4 +36,4 @@ async def load_test_logs() -> None:
     start_log_analyser()
     log_paths: tuple = (test_log_path2,)
     await import_logs(log_paths)
-    analyse()
+    print(analyse())
