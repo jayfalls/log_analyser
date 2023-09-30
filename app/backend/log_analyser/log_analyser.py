@@ -2,24 +2,38 @@ import asyncio
 import sqlite3
 import sys
 import os
-from .components.sql_log import SQL_Log
-from .components.log_to_db import LogToDatabase
+from .interfaces.log_analysis_tools import LogTools
 
 
 # VARIABLES
+## References
+log_tools: LogTools
 ## States
 debug_mode: bool = False
 
 
-# PROGRAM START
-async def run_log_analyser(log_path: str) -> None:
-    log_database: SQL_Log = SQL_Log()
-    if debug_mode:
-        log_database.debug_mode = True
-    log_database_error_check = await log_database.initialise_database()
-    if log_database_error_check is None:
-        raise Exception("Error: Failed to initialize the database.")
-        return
-    extractor: LogToDatabase = LogToDatabase()
-    await extractor.log_to_database(log_database, log_path)
-    log_database.close_database()
+# LOG INTERACTION
+def start_log_analyser() -> None:
+    global log_tools
+    log_tools = LogTools()
+    log_tools.debug_mode = debug_mode
+
+## Input
+async def import_logs(log_paths: tuple) -> None:
+    await log_tools.import_logs(log_paths)
+
+## Output
+def analyse(filters: tuple = ()) -> tuple:
+    return log_tools.analyse()
+
+
+# DEBUG
+## DEBUG VARIABLES
+test_log_path1: str = "log_analyser/.test_files/API2023_09_24.log"
+test_log_path2: str = "log_analyser/.test_files/API2023_09_27.log"
+## DEBUG FUNCTIONS
+async def load_test_logs() -> None:
+    start_log_analyser()
+    log_paths: tuple = (test_log_path2,)
+    await import_logs(log_paths)
+    analyse()

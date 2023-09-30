@@ -4,19 +4,12 @@ import pytest
 import sys
 
 
-# VARIABLES
-## Temp
-test_log_path: str = "log_analyser/.test_files/API2023_09_27.log"
-
-
-# LOG ANALYSER
-async def run_log_analyser() -> None:
-    await log_analyser.run_log_analyser(test_log_path)
-
-
 # STARTUP
 def initialize() -> None:
     if __name__ != "__main__":
+        return
+    # No arguments
+    if len(sys.argv) == 1:
         return
     # Check if "-debug" flag is provided
     if "-debug" in sys.argv[1]:
@@ -24,7 +17,7 @@ def initialize() -> None:
         log_analyser.debug_mode = True
     # Check if the '-test' flag is provided
     if not "-test" in sys.argv[1]:
-        asyncio.run(run_log_analyser())
+        asyncio.run(log_analyser.load_test_logs())
         return
     # Remove '-test' from the command-line arguments to prevent pytest from considering it as a test
     sys.argv[1] = sys.argv[1].replace(" -test", "")

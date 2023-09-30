@@ -1,14 +1,10 @@
-import asyncio
 import os
 import sqlite3
-
 
 # VARIABLES
 ## References
 script_path: str = os.path.abspath(__file__)
 directory_path: str = os.path.dirname(script_path)
-## States
-debug_mode = False
 ## Constants
 ### Normal
 DATABASE_PATH: str = f"{directory_path}/api_logs.db"
@@ -33,10 +29,39 @@ create_test_files_folder()
 DEBUG_DATABASE_PATH: str = f"{test_files_path}api_logs.db"
 
 
+# HELPER FUNCTIONS
+def inject_filters(filters: tuple) -> str:
+    filter_prompt: str = ""
+    filters_length: int = len(filters)
+    if not 0 < filters_length <= 3:
+        return ""
+    for index, filter in enumerate(filters):
+        if type(filter) != type(tuple):
+            raise ValueError("All filters must be of type: tuple")
+            break
+        if index == 0:
+            filter_prompt = f"WHERE log_id IN ({filter}) "
+            continue
+        if len(filter) != 2:
+            raise Exception("Date and Time filters should each be a tuple of (start, end)")
+            break
+        if index == 1:
+            filter_prompt += "AND date BETWEEN ? AND ? ", (filter[0], filter[1])
+            continue
+        filter_prompt += "AND time BETWEEN ? AND ? ", (filter[0], filter[1])
+    if filter_prompt == "":
+        raise Exception("Error: Unknown input to inject_filters()")
+        return ""
+    return filter_prompt
+
+
 class SQL_Log():
     # VARIABLES
     ## References
     database_connection: sqlite3.Connection
+    ## States
+    debug_mode: bool = False
+    filters: tuple # (log_ids, (start_date, end_date), (start_time, end_time))
 
     # ERROR HANDLING
     @staticmethod
@@ -50,7 +75,8 @@ class SQL_Log():
             print("An error occurred while initializing the database:", error_message)
 
     # DATABASE
-    async def initialise_database(self) -> sqlite3.Connection:
+    ## Access
+    def initialise_database(self) -> None:
         database_path: str = ""
         if self.debug_mode:
             database_path = DEBUG_DATABASE_PATH
@@ -67,19 +93,25 @@ class SQL_Log():
                 database_cursor.execute(f"CREATE TABLE IF NOT EXISTS {DATABASE_TABLE_NAME} ({tables})")
                 self.commit_to_database()
 
-                return new_database_connection
+                return
         except sqlite3.Error as error:
-            raise error
             self.handle_sql_error(error)
-            return None
+            raise error
+    
+    def close_database(self) -> None:
+        try:
+            self.database_connection.close()
+        except sqlite3.Error as error:
+            self.handle_sql_error(error)
+            raise error
 
     def commit_to_database(self) -> None:
         try:
             self.database_connection.commit()
         except sqlite3.Error as error:
-            raise error
             self.handle_sql_error(error)
-
+            raise error
+    
     def check_if_entry_exists(self, log_line: dict) -> bool:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
@@ -95,8 +127,8 @@ class SQL_Log():
 
             return does_exist
         except sqlite3.Error as error:
-            raise error
             self.handle_sql_error(error)
+            raise error
             return False
 
     def write_line_to_database(self, log_line: dict) -> None:
@@ -110,14 +142,17 @@ class SQL_Log():
             values_string: str = ", ".join([f":{str(table)}" for table in DATABASE_TABLE_NAMES])
             database_cursor.execute(f"INSERT INTO {DATABASE_TABLE_NAME} ({tables_string}) VALUES ({values_string})", log_line)
         except sqlite3.Error as error:
-            raise error
             self.handle_sql_error(error)
-            return False
-
-    def close_database(self) -> None:
+            raise error
+    
+    ## Analysis
+    def get_log_type_frequencies(self, filters: tuple = ()) -> tuple:
         try:
-            self.database_connection.close()
+            database_cursor: sqlite3.Cursor = self.database_connection.cursor()
+            database_cursor.execute(f"SELECT log_type, COUNT(*) FROM api_logs {inject_filters(filters)}GROUP BY log_type")
+            results: tuple = database_cursor.fetchall()
+            return results
         except sqlite3.Error as error:
-            raise error
             self.handle_sql_error(error)
-            return False
+            raise error
+            return None
