@@ -1,15 +1,18 @@
 import asyncio
-from ..components.sql_log import SQL_Log
-from ..components.log_to_db import LogToDatabase
-from ..components.analyser import Analyser
+import sqlite3
+import sys
+import os
+from .components.log_database import LogDatabase
+from .components.file_to_database import LogToDatabase
+from .components.database_analyser import LogDatabaseAnalyser
 
 
-class LogTools():
+class LogAnalyser():
     # VARIABLES
     ## References
-    log_database: SQL_Log
+    log_database: LogDatabase
     extractor: LogToDatabase
-    analyser: Analyser
+    analyser: LogDatabaseAnalyser
     ## States
     _debug_mode: bool = False
     ### State Changes
@@ -24,9 +27,9 @@ class LogTools():
     
     # OBJECT CREATION & DELETION
     def __init__(self):
-        self.log_database = SQL_Log()
+        self.log_database = LogDatabase()
         self.extractor = LogToDatabase()
-        self.analyser = Analyser()
+        self.analyser = LogDatabaseAnalyser()
         
     def __del__(self):
         self.log_database.close_database()
@@ -47,23 +50,23 @@ class LogTools():
         self.log_database.write_line_to_database(log_line)
     
     ### Querying
-    def get_log_type_frequencies(self) -> tuple:
-        return self.log_database.get_log_type_frequencies()
+    def get_log_type_frequencies(self, filters: tuple) -> tuple:
+        return self.log_database.get_log_type_frequencies(filters)
     
     ## Log To Database
     async def log_to_database(self, path_to_log: str) -> None:
         await self.extractor.log_to_database(self, path_to_log)
     
     ## Log Analysis
-    def analyse(self) -> tuple:
-        return self.analyser.analyse(self)
+    def analyse(self, filters: tuple) -> tuple:
+        return self.analyser.analyse(self, filters)
     
     # OUTER FUNCTIONS
-    async def import_logs(self, log_paths: tuple) -> None:
-        if len(log_paths) == 0:
+    async def import_logs(self, log_paths: set) -> None:
+        if not log_paths:
             return
         if len(log_paths) == 1:
-            await self.log_to_database(log_paths[0])
+            await self.log_to_database(log_paths.pop())
         else:
             load_tasks: list = []
             for log_path in log_paths:

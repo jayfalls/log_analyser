@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 import sqlite3
 
@@ -7,7 +8,7 @@ script_path: str = os.path.abspath(__file__)
 directory_path: str = os.path.dirname(script_path)
 ## Constants
 ### Normal
-DATABASE_PATH: str = f"{directory_path}/api_logs.db"
+DATABASE_PATH = os.path.join(directory_path, "api_logs.db")
 DATABASE_TABLE_NAME: str = "api_logs"
 DATABASE_TABLE_NAMES: tuple = (
     "log_id", 
@@ -17,8 +18,15 @@ DATABASE_TABLE_NAMES: tuple = (
     "time", 
     "message"
 )
+class DATABASE_TABLE_INDEXES(Enum):
+    LOG_ID: int = 0
+    LOG_TYPE: int = 1
+    SOURCE: int = 2
+    DATE: int = 3
+    TIME: int = 4
+    MESSAGE: int = 5
 ### Debug
-test_files_path: str = f"{directory_path}/.test_files/"
+test_files_path = os.path.join(directory_path, ".test_files/")
 def create_test_files_folder():
     # See if test_files_path exists
     if os.path.exists(test_files_path):
@@ -26,36 +34,52 @@ def create_test_files_folder():
 
     os.mkdir(test_files_path)
 create_test_files_folder()
-DEBUG_DATABASE_PATH: str = f"{test_files_path}api_logs.db"
+DEBUG_DATABASE_PATH = os.path.join(test_files_path, "api_logs.db")
 
 
 # HELPER FUNCTIONS
+def get_table_filter(table_name: str, tables_values: set) -> str:
+    if not table_name:
+        raise Exception("SQL Error: Table name cannot be empty")
+    if not len(tables_values) > 0:
+        raise Exception(f"SQL Error: Table filter {table_name} can't be empty!")
+    return f"WHERE {table_name} IN ({tables_values}) "
+
+def add_date_filter(date_range: tuple, existing_filter: str = "") -> str:
+    if len(date_range) != 2:
+        raise ValueError("Date filters should each be a tuple of (start, end)")
+    start_date, end_date = date_range
+    if not isinstance(start_date, str) or not isinstance(end_date, str):
+        raise ValueError("Date filters should be strings.")
+    return f"{existing_filter}AND date BETWEEN ? AND ? ", (date_range[0], date_range[1])
+
+def add_time_filter(time_range: tuple, existing_filter: str = "") -> str:
+    if len(time_range) != 2:
+        raise ValueError("Time filters should each be a tuple of (start, end)")
+    start_time, end_time = time_range
+    if not isinstance(start_time, str) or not isinstance(end_time, str):
+        raise ValueError("Time filters should be strings.")
+    return f"{existing_filter}AND time BETWEEN ? AND ? ", (time_range[0], time_range[1])
+
 def inject_filters(filters: tuple) -> str:
     filter_prompt: str = ""
     filters_length: int = len(filters)
     if not 0 < filters_length <= 3:
         return ""
     for index, filter in enumerate(filters):
-        if type(filter) != type(tuple):
-            raise ValueError("All filters must be of type: tuple")
-            break
         if index == 0:
-            filter_prompt = f"WHERE log_id IN ({filter}) "
+            filter_prompt = get_table_filter(DATABASE_TABLE_NAMES[DATABASE_TABLE_INDEXES.LOG_ID.value], filter)
             continue
-        if len(filter) != 2:
-            raise Exception("Date and Time filters should each be a tuple of (start, end)")
-            break
         if index == 1:
-            filter_prompt += "AND date BETWEEN ? AND ? ", (filter[0], filter[1])
+            filter_prompt += add_date_filter(filter, filter_prompt)
             continue
-        filter_prompt += "AND time BETWEEN ? AND ? ", (filter[0], filter[1])
+        filter_prompt += add_time_filter(filter, filter_prompt)
     if filter_prompt == "":
         raise Exception("Error: Unknown input to inject_filters()")
-        return ""
     return filter_prompt
 
 
-class SQL_Log():
+class LogDatabase():
     # VARIABLES
     ## References
     database_connection: sqlite3.Connection

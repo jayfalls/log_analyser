@@ -9,3 +9,8 @@
 - [Wednesday](../days/27Sept2023.md)
 - [Thursday](../days/28Sept2023.md)
 - [Friday](../days/29Sept2023.md)
+- [Saturday](../days/30Sept2023.md)
+
+## Week 2
+
+- [Monday](../days/02Oct2023.md)

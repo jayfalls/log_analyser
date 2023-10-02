@@ -1,3 +1,7 @@
-# Developer Settings
+# SETTINGS
+## Developer
 debug = 1
 test = 0
+
+## Server
+local_mode = 0

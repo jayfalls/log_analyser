@@ -92,22 +92,22 @@ class LogToDatabase():
             "message": message,
         }
 
-    async def extract_log_to_database(self, log_tools, logs: str) -> None:
+    async def extract_log_to_database(self, log_analyser, logs: str) -> None:
         for log_line in logs.splitlines():
             log_line_separated: dict = self.extract_log_line(log_line)
             if log_line_separated is None:
                 print("Error: Failed to extract log line:", log_line)
                 continue
             try:
-                log_tools.write_line_to_database(log_line_separated)
+                log_analyser.write_line_to_database(log_line_separated)
             except Exception as error:
                 print("Error occurred while writing log line to database:", log_line)
                 print("Error message:", str(error))
                 raise error
                 continue
-        log_tools.commit_to_database()
+        log_analyser.commit_to_database()
     
-    async def log_to_database(self, log_tools, path_to_log: str) -> None:
+    async def log_to_database(self, log_analyser, path_to_log: str) -> None:
         logs: str = await self.clean_log_file(path_to_log)
         if logs in LOG_FILE_ERRORS:
             print(logs)
@@ -116,9 +116,9 @@ class LogToDatabase():
             print("There are no valid logs in this log file.\n")
             return
         try:
-            await self.extract_log_to_database(log_tools, logs)
+            await self.extract_log_to_database(log_analyser, logs)
         except Exception as error:
             print("Error occurred while extracting logs to the database:")
             raise error
-            log_tools.close_database()
+            log_analyser.close_database()
             return

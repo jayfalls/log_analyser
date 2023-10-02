@@ -10,9 +10,14 @@ source .env/bin/activate
 
 # Install requirements
 pip install -r requirements.txt
+npm install bun --omit=dev
+
+## NPM/BUN
+export PATH="/Users/owner/.bun/bin:$PATH"
+source PATH
 
 # Change directory to backend
-cd backend
+cd server
 
 # Run python backend.py with or without -test parameter based on debug and test values
 run_commands=""
@@ -23,4 +28,4 @@ if [ "$debug" = "1" ]; then
     fi
 fi
 
-python backend.py "$run_commands"
+python server.py "$run_commands"
