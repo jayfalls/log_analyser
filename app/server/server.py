@@ -12,7 +12,7 @@ log_analyser: LogAnalyser = None
 debug_mode: bool = False
 
 
-# TOOL CREATION4
+# TOOL CREATION
 def create_log_analyser() -> None:
     global log_analyser
     log_analyser = LogAnalyser()
@@ -46,24 +46,36 @@ async def log_analyser_debug() -> None:
 
 
 # STARTUP
-def initialize() -> None:
-    if __name__ != "__main__":
-        return
-    # No arguments
-    if len(sys.argv) == 1:
-        return
-    # Check if "-debug" flag is provided
-    if "-debug" in sys.argv[1]:
-        global debug_mode
-        sys.argv[1] = sys.argv[1].replace("-debug", "")
-        debug_mode = True
-    # Check if the '-test' flag is provided
-    if not "-test" in sys.argv[1]:
-        asyncio.run(log_analyser_debug())
-        return
+def check_if_debug() -> bool:
+    if not "-debug" in sys.argv[1]:
+        return False
+    global debug_mode
+    sys.argv[1] = sys.argv[1].replace("-debug", "")
+    debug_mode = True
+    return True
+
+def check_if_test() -> bool:
+    if "-test" in sys.argv[1]:
+        return True
+    return False
+
+def test() -> None:
     # Remove '-test' from the command-line arguments to prevent pytest from considering it as a test
     sys.argv[1] = sys.argv[1].replace(" -test", "")
     # Run pytest with the specified arguments
     pytest.main(["--junitxml=testing/test_results.xml"])
+
+
+def initialize() -> None:
+    if __name__ != "__main__":
+        return
+    if len(sys.argv) == 1: # No arguments
+        return
+    if not check_if_debug():
+        return
+    if not check_if_test():
+        asyncio.run(log_analyser_debug())
+        return
+    test()
 
 initialize()

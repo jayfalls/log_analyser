@@ -169,7 +169,21 @@ class LogDatabase():
             self.handle_sql_error(error)
             raise error
     
-    ## Analysis
+    ## Querying
+    def get_logs(self, filters: tuple = ()) -> tuple:
+        try:
+            database_cursor: sqlite3.Cursor = self.database_connection.cursor()
+            database_cursor.execute(f"SELECT log_type, date, time, source, message  FROM api_logs {inject_filters(filters)}GROUP BY time")
+            results: tuple = database_cursor.fetchall()
+            new_results: list = []
+            for result in results:
+                new_results.append(" ".join(result))
+            return new_results
+        except sqlite3.Error as error:
+            self.handle_sql_error(error)
+            raise error
+            return None
+
     def get_log_type_frequencies(self, filters: tuple = ()) -> tuple:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()

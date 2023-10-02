@@ -50,6 +50,9 @@ class LogAnalyser():
         self.log_database.write_line_to_database(log_line)
     
     ### Querying
+    def get_logs(self, filters: tuple) -> tuple:
+        return self.log_database.get_logs(filters)
+
     def get_log_type_frequencies(self, filters: tuple) -> tuple:
         return self.log_database.get_log_type_frequencies(filters)
     

@@ -25,7 +25,7 @@
 
 - ### Recurring Pattern Identification
   
-  Possible approaches provided by Claude 2:
+  Possible approaches provided by a gpt:
   
   1. **Pattern Matching:**
      

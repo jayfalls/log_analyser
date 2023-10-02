@@ -10,13 +10,9 @@ source .env/bin/activate
 
 # Install requirements
 pip install -r requirements.txt
-npm install bun --omit=dev
+python -m spacy download en_core_web_sm
 
-## NPM/BUN
-export PATH="/Users/owner/.bun/bin:$PATH"
-source PATH
-
-# Change directory to backend
+# Server
 cd server
 
 # Run python backend.py with or without -test parameter based on debug and test values
@@ -29,3 +25,8 @@ if [ "$debug" = "1" ]; then
 fi
 
 python server.py "$run_commands"
+
+# Client
+cd ../client
+
+#npm run dev

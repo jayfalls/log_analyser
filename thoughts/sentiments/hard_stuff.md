@@ -25,5 +25,11 @@
   - Because I'm not used to building, especially in python, things are taking a bit longer than I'd like because I'm really having to deliberate, learn and fix while implementing.
   
   - I'm sure that as I build more and more, things will get a lot quicker
+
+- ## Setting up Frontend
   
+  - I have never used react before, as well as just in general never really having worked with websites at all
   
+  - This is a topic I definetely need to revisit as I basically know nothing
+
+- # 

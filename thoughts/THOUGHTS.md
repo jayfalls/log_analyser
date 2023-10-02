@@ -23,7 +23,7 @@ This serves to document my thought processes during the creation of this project
 - ## 🗄️ [DOCUMENTS](./mocs/documents.md)
   
   - [AGILE](./documents/agile.md)
-  - [Implementation](./documents/implementation.md)
+  - [Functional Breakdown](./documents/functional_breakdown.md)
 
 - ## 🗨️ [SENTIMENTS](./mocs/sentiments.md)
   
