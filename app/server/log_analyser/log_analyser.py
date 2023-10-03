@@ -77,6 +77,9 @@ class LogAnalyser():
     def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:
         self.visualiser.visualise_bar_graph(graph_details, xy_array, shuffle)
     
+    def visualise_log_type_time_series(self, log_type_data_frames: dict) -> None:
+        self.visualiser.visualise_log_type_time_series(log_type_data_frames)
+    
     # OUTER FUNCTIONS
     async def import_logs(self, log_paths: set) -> None:
         if not log_paths:
