@@ -8,18 +8,19 @@ class LogTokeniser():
     filters: tuple
     infrequent_threshold: int = 2 # The minimum number of occurrences required for a token to be considered significant
     
-    @staticmethod
+    @staticmethod``
     def tokenise_log_message(log_message: str) -> Doc:
         nlp = spacy.load("en_core_web_sm")
         doc = nlp(log_message)
         return doc
+        Doc.
     
     def tokenise_log_messages(self, log_messages: tuple) -> List[str]:
         
         tokenised_messages: List[Doc] = []
         for log_message in log_messages:
             tokenised_messages.append(self.tokenise_log_message(log_message))
-        tokens = [token.token for doc in tokenised_messages for token in doc]
+        tokens = [token. for doc in tokenised_messages for token in doc]
         return tokens
 
     @staticmethod
