@@ -14,3 +14,4 @@
 ## Week 2
 
 - [Monday](../days/02Oct2023.md)
+- [Tuesday](../days/03Oct2023.md)

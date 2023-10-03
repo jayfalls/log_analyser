@@ -32,6 +32,7 @@ class LogAnalyser():
         self.log_database = LogDatabase()
         self.extractor = LogToDatabase()
         self.analyser = LogDatabaseAnalyser()
+        self.analyser.log_analyser = self
         self.visualiser = AnalysisVisualiser()
         
     def __del__(self):
@@ -65,11 +66,11 @@ class LogAnalyser():
     
     ## Log Analysis
     def analyse(self, filters: tuple) -> tuple:
-        return self.analyser.analyse(self, filters)
+        return self.analyser.analyse(filters)
 
     ## Analysis Visualisation
-    def visualise_bar_graph(self, xy_array: tuple, shuffle: bool = False) -> None:
-        self.visualiser.visualise_bar_graph(xy_array, shuffle)
+    def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:
+        self.visualiser.visualise_bar_graph(graph_details, xy_array, shuffle)
     
     # OUTER FUNCTIONS
     async def import_logs(self, log_paths: set) -> None:
