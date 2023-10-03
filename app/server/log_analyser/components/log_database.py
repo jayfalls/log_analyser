@@ -170,7 +170,7 @@ class LogDatabase():
             raise error
     
     ## Querying
-    def get_logs(self, filters: tuple = ()) -> tuple:
+    def get_all_logs(self, filters: tuple = ()) -> tuple:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
             database_cursor.execute(f"SELECT log_type, date, time, source, message  FROM api_logs {inject_filters(filters)}GROUP BY time")
@@ -188,6 +188,17 @@ class LogDatabase():
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
             database_cursor.execute(f"SELECT log_type, COUNT(*) AS log_count FROM api_logs {inject_filters(filters)}GROUP BY log_type ORDER BY log_count ASC")
+            results: tuple = database_cursor.fetchall()
+            return results
+        except sqlite3.Error as error:
+            self.handle_sql_error(error)
+            raise error
+            return None
+    
+    def get_sorted_messages(self, filters: tuple = ()) -> tuple:
+        try:
+            database_cursor: sqlite3.Cursor = self.database_connection.cursor()
+            database_cursor.execute(f"SELECT message, date, time FROM api_logs {inject_filters(filters)}ORDER BY message, date, time")
             results: tuple = database_cursor.fetchall()
             return results
         except sqlite3.Error as error:

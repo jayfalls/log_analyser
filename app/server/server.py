@@ -12,12 +12,15 @@ log_analyser: LogAnalyser = None
 debug_mode: bool = False
 
 
-# TOOL CREATION
+# TOOL CREATION / MODIFICATION
 def create_log_analyser() -> None:
     global log_analyser
     log_analyser = LogAnalyser()
     log_analyser.debug_mode = debug_mode
 
+def update_filters(filters: tuple) -> None:
+    global log_analyser
+    log_analyser.filters = filters
 
 # LOG ANALYSER
 async def import_logs(log_paths: set) -> None:
@@ -28,7 +31,7 @@ async def import_logs(log_paths: set) -> None:
 def analyse_logs(filters: tuple = ()) -> tuple:
     if log_analyser is None:
         create_log_analyser()
-    return log_analyser.analyse(filters)
+    return log_analyser.analyse()
 
 
 # DEBUGGING

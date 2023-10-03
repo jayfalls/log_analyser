@@ -26,6 +26,8 @@ class LogAnalyser():
         self._debug_mode = value
         self.log_database.debug_mode = self.debug_mode
         self.log_database.initialise_database()
+    ## SQL
+    filters: tuple = ()
     
     # OBJECT CREATION & DELETION
     def __init__(self):
@@ -54,19 +56,22 @@ class LogAnalyser():
         self.log_database.write_line_to_database(log_line)
     
     ### Querying
-    def get_logs(self, filters: tuple) -> tuple:
-        return self.log_database.get_logs(filters)
+    def get_logs(self) -> tuple:
+        return self.log_database.get_logs(self.filters)
 
-    def get_log_type_frequencies(self, filters: tuple) -> tuple:
-        return self.log_database.get_log_type_frequencies(filters)
+    def get_log_type_frequencies(self) -> tuple:
+        return self.log_database.get_log_type_frequencies(self.filters)
+    
+    def get_sorted_messages(self) -> tuple:
+        return self.log_database.get_sorted_messages(self.filters)
     
     ## Log To Database
     async def log_to_database(self, path_to_log: str) -> None:
         await self.extractor.log_to_database(self, path_to_log)
     
     ## Log Analysis
-    def analyse(self, filters: tuple) -> tuple:
-        return self.analyser.analyse(filters)
+    def analyse(self) -> tuple:
+        return self.analyser.analyse(self.filters)
 
     ## Analysis Visualisation
     def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:

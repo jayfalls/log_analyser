@@ -22,4 +22,6 @@ This document aims to conceptualise how the program could be built, including:
 
 ## [Log Structure Analysis](./functional_breakdown/log_structure_analysis.md)
 
+## FAILED
+
 ## [Risk Assessment](./functional_breakdown/risk_assessment.md)
