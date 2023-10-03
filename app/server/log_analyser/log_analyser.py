@@ -61,9 +61,9 @@ class LogAnalyser():
 
     def get_log_type_frequencies(self) -> tuple:
         return self.log_database.get_log_type_frequencies(self.filters)
-    
-    def get_sorted_messages(self) -> tuple:
-        return self.log_database.get_sorted_messages(self.filters)
+
+    def get_sorted_log_types(self) -> dict:
+        return self.log_database.get_sorted_log_types(self.filters)
     
     ## Log To Database
     async def log_to_database(self, path_to_log: str) -> None:

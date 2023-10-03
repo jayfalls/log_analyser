@@ -195,12 +195,19 @@ class LogDatabase():
             raise error
             return None
     
-    def get_sorted_messages(self, filters: tuple = ()) -> tuple:
+    def get_sorted_log_types(self, filters: tuple = ()) -> dict:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
-            database_cursor.execute(f"SELECT message, date, time FROM api_logs {inject_filters(filters)}ORDER BY message, date, time")
+            database_cursor.execute(f"SELECT log_type, message, date, time FROM api_logs {inject_filters(filters)}ORDER BY message, date, time")
             results: tuple = database_cursor.fetchall()
-            return results
+
+            log_types: dict = {}
+            for result in results:
+                log_type = result[0]
+                if log_type not in log_types:
+                    log_types[log_type] = []
+                log_types[log_type].append(result[1:])
+            return log_types
         except sqlite3.Error as error:
             self.handle_sql_error(error)
             raise error
