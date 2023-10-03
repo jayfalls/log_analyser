@@ -5,6 +5,7 @@ import os
 from .components.log_database import LogDatabase
 from .components.file_to_database import LogToDatabase
 from .components.database_analyser import LogDatabaseAnalyser
+from .components.analysis_visualiser import AnalysisVisualiser
 
 
 class LogAnalyser():
@@ -13,6 +14,7 @@ class LogAnalyser():
     log_database: LogDatabase
     extractor: LogToDatabase
     analyser: LogDatabaseAnalyser
+    visualiser: AnalysisVisualiser
     ## States
     _debug_mode: bool = False
     ### State Changes
@@ -30,6 +32,7 @@ class LogAnalyser():
         self.log_database = LogDatabase()
         self.extractor = LogToDatabase()
         self.analyser = LogDatabaseAnalyser()
+        self.visualiser = AnalysisVisualiser()
         
     def __del__(self):
         self.log_database.close_database()
@@ -63,6 +66,10 @@ class LogAnalyser():
     ## Log Analysis
     def analyse(self, filters: tuple) -> tuple:
         return self.analyser.analyse(self, filters)
+
+    ## Analysis Visualisation
+    def visualise_bar_graph(self, xy_array: tuple, shuffle: bool = False) -> None:
+        self.visualiser.visualise_bar_graph(xy_array, shuffle)
     
     # OUTER FUNCTIONS
     async def import_logs(self, log_paths: set) -> None:

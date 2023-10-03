@@ -187,7 +187,7 @@ class LogDatabase():
     def get_log_type_frequencies(self, filters: tuple = ()) -> tuple:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
-            database_cursor.execute(f"SELECT log_type, COUNT(*) FROM api_logs {inject_filters(filters)}GROUP BY log_type")
+            database_cursor.execute(f"SELECT log_type, COUNT(*) AS log_count FROM api_logs {inject_filters(filters)}GROUP BY log_type ORDER BY log_count ASC")
             results: tuple = database_cursor.fetchall()
             return results
         except sqlite3.Error as error:

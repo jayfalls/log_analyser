@@ -10,7 +10,6 @@ source .env/bin/activate
 
 # Install requirements
 pip install -r requirements.txt
-python -m spacy download en_core_web_sm
 
 # Server
 cd server
@@ -27,6 +26,6 @@ fi
 python server.py "$run_commands"
 
 # Client
-cd ../client
+#cd ../client
 
 #npm run dev
