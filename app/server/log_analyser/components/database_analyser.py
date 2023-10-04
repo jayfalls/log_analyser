@@ -38,8 +38,12 @@ class LogDatabaseAnalyser():
         # Set the datetime column as the index
         data_frame.set_index('datetime', inplace=True)
         # Resample the data to the specified time interval and count the occurrences
-        frequency_over_time = data_frame.resample(str(time_interval_minutes) + 'T').size()
-        frequency_over_time = frequency_over_time.to_frame(name='frequency')
+        frequency_over_time = data_frame.groupby('datetime').count()
+        frequency_over_time.columns = ['frequency']
+        #frequency_over_time = data_frame.resample(str(time_interval_minutes) + 'T').size()
+        frequency_over_time = frequency_over_time.resample(str(time_interval_minutes) + 'T').sum()
+        # Remove frequencies of 0
+        #frequency_over_time = frequency_over_time[frequency_over_time['frequency'] != 0]
         return frequency_over_time
     
     @staticmethod
@@ -53,24 +57,21 @@ class LogDatabaseAnalyser():
         return merged_data_frame
     
     @staticmethod
-    def calculate_matrix_profile(data_frame: DataFrame) -> DataFrame:
+    def calculate_matrix_profile(data_frame: DataFrame) -> list[array]:
         # Convert the "frequency" column to float64 dtype
         data = data_frame["frequency"].values.astype(numpy.float64)
-        # Retrieve the datetime column
-        datetime_column = data_frame["datetime"]
+        window_size: int = int(len(data) / 2)
+        print(f"Window size is {window_size}")
+        if not window_size > 3:
+            return array
         # Calculate the matrix profiles
-        matrix_profiles = stump(data, m=5)  # You can modify the parameter 'm' as per your requirement
-        # Reshape the matrix profiles array
-        matrix_profiles_reshaped = matrix_profiles.reshape(-1, 1)
-        # Create DataFrame with reshaped matrix profiles and datetime column
-        matrix_profiles_data_frame = pandas.DataFrame(matrix_profiles_reshaped, columns=["frequency"])
-        matrix_profiles_data_frame["datetime"] = datetime_column
-        return matrix_profiles_data_frame
+        matrix_profile = stump(data, m=window_size)  # You can modify the parameter 'm' as per your requirement
+        return [matrix_profile, window_size]
 
     def plot_log_message_frequencies(self, sorted_log_messages: dict, time_interval_minutes: int):
         # Iterate over log types and append results to the DataFrame
         log_type_data_frames: dict = {}
-        matrix_profile_data_frames: dict = {}
+        matrix_profiles: dict = {}
         for log_type, results in sorted_log_messages.items():
             data_frame: DataFrame = pandas.DataFrame(columns=['log_message', 'date', 'time'])
             for result in results:
@@ -81,11 +82,13 @@ class LogDatabaseAnalyser():
             frequency_over_time = self.process_frequency_over_time(data_frame, time_interval_minutes)
             print(frequency_over_time.describe())
             log_type_data_frames[log_type] = frequency_over_time
-            matrix_profile_data_frames[log_type] = self.calculate_matrix_profile(frequency_over_time)
+            matrix_profiles[log_type] = self.calculate_matrix_profile(frequency_over_time)
         log_type_data_frames["ALL"] = self.join_dataframes(log_type_data_frames.values())
+        matrix_profiles["ALL"] = self.calculate_matrix_profile(log_type_data_frames["ALL"])
 
-        self.log_analyser.visualise_log_type_time_series(log_type_data_frames)
-        self.log_analyser.visualise_log_type_time_series(matrix_profile_data_frames)
+        self.log_analyser.plot_multi_time_series_matrix(log_type_data_frames, matrix_profiles)
+        #self.log_analyser.visualise_log_type_time_series(log_type_data_frames)
+        #self.log_analyser.visualise_log_type_time_series(matrix_profiles)
 
     def analyse(self, filters: tuple = ()) -> None:
         log_frequencies: tuple = self.get_log_type_frequencies()

@@ -80,6 +80,9 @@ class LogAnalyser():
     def visualise_log_type_time_series(self, log_type_data_frames: dict) -> None:
         self.visualiser.visualise_log_type_time_series(log_type_data_frames)
     
+    def plot_multi_time_series_matrix(self, log_type_data_frames: dict, matrix_profiles: dict) -> None:
+        self.visualiser.plot_multi_time_series_matrix(log_type_data_frames, matrix_profiles)
+    
     # OUTER FUNCTIONS
     async def import_logs(self, log_paths: set) -> None:
         if not log_paths:
