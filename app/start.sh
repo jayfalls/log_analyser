@@ -5,14 +5,11 @@ debug=$(grep 'debug' settings | cut -d'=' -f2 | tr -d ' ')
 test=$(grep 'test' settings | cut -d'=' -f2 | tr -d ' ')
 
 # Create a virtual environment
-python -m venv .env
+python3 -m venv .env
 source .env/bin/activate
 
 # Install requirements
-pip install -r requirements.txt
-
-# Server
-cd server
+pip3 install -r requirements.txt
 
 # Run python backend.py with or without -test parameter based on debug and test values
 run_commands=""
@@ -23,9 +20,4 @@ if [ "$debug" = "1" ]; then
     fi
 fi
 
-python server.py "$run_commands"
-
-# Client
-#cd ../client
-
-#npm run dev
+python log_analyser.py "$run_commands"
