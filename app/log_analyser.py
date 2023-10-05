@@ -1,54 +1,54 @@
 import asyncio
 import pytest
 import sys
-from log_analyser.log_analyser import LogAnalyser
+from program.log_analyser_interface import LogAnalyserInterface
 
 
 # VARIABLES
 ## References
-log_analyser: LogAnalyser = None
+interface: LogAnalyserInterface = None
 ## States
 debug_mode: bool = False
 
 
 # TOOL CREATION / MODIFICATION
-def create_log_analyser() -> None:
-    global log_analyser
-    log_analyser = LogAnalyser()
-    log_analyser.debug_mode = debug_mode
+def create_interface() -> None:
+    global interface
+    interface = LogAnalyserInterface()
+    interface.debug_mode = debug_mode
 
 def update_filters(filters: tuple) -> None:
-    global log_analyser
-    log_analyser.set_filters(filters)
+    global interface
+    interface.set_filters(filters)
 
 
 # LOG ANALYSIS
 async def import_logs(log_paths: set) -> None:
-    if log_analyser is None:
-        create_log_analyser()
-    await log_analyser.import_logs(log_paths) 
+    if interface is None:
+        create_interface()
+    await interface.import_logs(log_paths) 
 
 def analyse_logs(filters: tuple = ()) -> tuple:
-    if log_analyser is None:
-        create_log_analyser()
-    return log_analyser.analyse()
+    if interface is None:
+        create_interface()
+    return interface.analyse()
 
 
 # DEBUGGING
-async def log_analyser_debug() -> None:
+async def interface_debug() -> None:
     # DEBUG VARIABLES
-    test_log_path1: str = "log_analyser/.test_files/API2023_09_24.log"
-    test_log_path2: str = "log_analyser/.test_files/API2023_09_27.log"
+    test_log_path1: str = "program/.test_files/API2023_09_24.log"
+    test_log_path2: str = "program/.test_files/API2023_09_27.log"
     test_log_paths: set = set()
     #test_log_paths.add(test_log_path1)
     test_log_paths.add(test_log_path2)
 
-    create_log_analyser()
+    create_interface()
     await import_logs(test_log_paths)
     analyse_logs()
 
 
-# STARTUP
+# INITIALISATION
 def check_if_debug() -> bool:
     if not "-debug" in sys.argv[1]:
         return False
@@ -76,7 +76,7 @@ def initialize() -> None:
     if not check_if_debug():
         return
     if not check_if_test():
-        asyncio.run(log_analyser_debug())
+        asyncio.run(interface_debug())
         return
     test()
 

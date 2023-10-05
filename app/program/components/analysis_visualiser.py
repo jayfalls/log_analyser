@@ -124,10 +124,3 @@ class AnalysisVisualiser():
         axs[0].legend()
         axs[1].legend()
         show_plot()
-    
-    def plot_time_series(self, data_frames: dict) -> None:
-        for title, frequency_over_time in data_frames.items():
-            if not len(frequency_over_time) > 1:
-                continue
-            self.visualise_time_series(frequency_over_time, title)
-        show_plot()

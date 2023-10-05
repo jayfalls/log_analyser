@@ -20,4 +20,5 @@ if [ "$debug" = "1" ]; then
     fi
 fi
 
+cd app
 python log_analyser.py "$run_commands"

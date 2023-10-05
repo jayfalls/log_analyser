@@ -27,7 +27,7 @@ def seperate_all_from_dict(contains_all_key: dict) -> tuple:
 class LogDatabaseAnalyser():
     # VARIABLES
     ## References
-    # | log_analyser | Must be assigned by log_analyser interface
+    # | log_analyser_interface | Must be assigned by log_analyser_interface
     ## States
     time_interval_minutes: int = 2
     matrix_window_modifier: int = 20
@@ -95,17 +95,17 @@ class LogDatabaseAnalyser():
         mismatch_data_frame = mismatch_data_frame.set_index("datetime")
         return mismatch_data_frame
 
-    # ANALYSIS
+    # VISUALISATION
     ## Bar Graphs
     def plot_log_type_frequencies(self) -> None:
-        log_type_frequencies: tuple = self.log_analyser.get_log_type_frequencies()
+        log_type_frequencies: tuple = self.log_analyser_interface.get_log_type_frequencies()
         graph_details: tuple = ("Log Type Frequency", "LOG TYPE", "OCCURENCES")
-        self.log_analyser.visualise_bar_graph(graph_details, log_type_frequencies, True)
+        self.log_analyser_interface.visualise_bar_graph(graph_details, log_type_frequencies, True)
     
     def plot_source_frequencies(self) -> None:
-        source_frequencies: tuple = self.log_analyser.get_source_frequencies()
+        source_frequencies: tuple = self.log_analyser_interface.get_source_frequencies()
         graph_details: tuple = ("Source Frequency", "SOURCE", "OCCURENCES")
-        self.log_analyser.visualise_bar_graph(graph_details, source_frequencies, True)
+        self.log_analyser_interface.visualise_bar_graph(graph_details, source_frequencies, True)
 
     ## Time Series Graphs
     def plot_frequency_matrix(self, sorted_messages: dict, ignore_all: bool = False) -> None:
@@ -113,18 +113,18 @@ class LogDatabaseAnalyser():
         all_frame, seperated_frames = seperate_all_from_dict(data_frames)
         all_matrixes, seperated_matrixes = seperate_all_from_dict(matrix_profiles)
         if not ignore_all:
-            self.log_analyser.visualise_time_series(all_frame[ALL_KEY], f"{ALL_KEY} Log Messages")
-        self.log_analyser.plot_multi_time_series_matrix(seperated_frames, seperated_matrixes)
+            self.log_analyser_interface.visualise_time_series(all_frame[ALL_KEY], f"{ALL_KEY} Log Messages")
+        self.log_analyser_interface.plot_multi_time_series_matrix(seperated_frames, seperated_matrixes)
         
         if "ERROR" in seperated_frames.keys():
             self.get_mismatched_frequencies(seperated_frames["ERROR"], seperated_frames["STACKTRACE"])
     
     def plot_log_types_over_time(self) -> None:
-        sorted_log_type_messages: dict = self.log_analyser.get_sorted_log_types()
+        sorted_log_type_messages: dict = self.log_analyser_interface.get_sorted_log_types()
         self.plot_frequency_matrix(sorted_log_type_messages)
 
     def plot_sources_over_time(self) -> None:
-        sorted_source_messages: dict = self.log_analyser.get_sorted_sources()
+        sorted_source_messages: dict = self.log_analyser_interface.get_sorted_sources()
         self.plot_frequency_matrix(sorted_source_messages, ignore_all=True)
     
     # OUTER FUNCTION

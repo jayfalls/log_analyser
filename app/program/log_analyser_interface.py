@@ -8,7 +8,7 @@ from .components.database_analyser import LogDatabaseAnalyser
 from .components.analysis_visualiser import AnalysisVisualiser
 
 
-class LogAnalyser():
+class LogAnalyserInterface():
     # VARIABLES
     ## References
     log_database: LogDatabase
@@ -32,7 +32,7 @@ class LogAnalyser():
         self.log_database = LogDatabase()
         self.extractor = LogToDatabase()
         self.analyser = LogDatabaseAnalyser()
-        self.analyser.log_analyser = self
+        self.analyser.log_analyser_interface = self
         self.visualiser = AnalysisVisualiser()
         
     def __del__(self):
