@@ -40,8 +40,8 @@ async def log_analyser_debug() -> None:
     test_log_path1: str = "log_analyser/.test_files/API2023_09_24.log"
     test_log_path2: str = "log_analyser/.test_files/API2023_09_27.log"
     test_log_paths: set = set()
-    test_log_paths.add(test_log_path1)
-    #test_log_paths.add(test_log_path2)
+    #test_log_paths.add(test_log_path1)
+    test_log_paths.add(test_log_path2)
 
     create_log_analyser()
     await import_logs(test_log_paths)

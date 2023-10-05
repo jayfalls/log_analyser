@@ -30,7 +30,7 @@ class LogDatabaseAnalyser():
     # | log_analyser | Must be assigned by log_analyser interface
     ## States
     time_interval_minutes: int = 2
-    matrix_window_modifier: int = 10
+    matrix_window_modifier: int = 20
 
     # TIME SERIES
     ## Frequency Over Time
@@ -79,8 +79,21 @@ class LogDatabaseAnalyser():
                 continue
             frequency_over_time, matrix_profile = frequency_time_matrix
             data_frames[key] = frequency_over_time
+            if key == ALL_KEY:
+                continue
             matrix_profiles[key] = matrix_profile
         return (data_frames, matrix_profiles)
+    
+    # ANOMALY DETECTION
+    @staticmethod
+    def get_mismatched_frequencies(data_frame1: DataFrame, data_frame2: DataFrame) -> DataFrame:
+        data_frame1 = data_frame1.reset_index()
+        data_frame2 = data_frame2.reset_index()
+        merged_data_frame: DataFrame = pandas.merge(data_frame1, data_frame2, on="datetime", how="outer", suffixes=("_1", "_2"))
+        merged_data_frame["mismatch"] = (merged_data_frame["frequency_1"] != merged_data_frame["frequency_2"])
+        mismatch_data_frame: DataFrame = merged_data_frame[merged_data_frame["mismatch"]][["datetime", "mismatch"]] # Only returns collums where the collum "mismatch" contains true
+        mismatch_data_frame = mismatch_data_frame.set_index("datetime")
+        return mismatch_data_frame
 
     # ANALYSIS
     ## Bar Graphs
@@ -97,11 +110,14 @@ class LogDatabaseAnalyser():
     ## Time Series Graphs
     def plot_frequency_matrix(self, sorted_messages: dict, ignore_all: bool = False) -> None:
         data_frames, matrix_profiles = self.plot_message_frequencies_matrix(sorted_messages)
-        all_frames, seperated_frames = seperate_all_from_dict(data_frames)
+        all_frame, seperated_frames = seperate_all_from_dict(data_frames)
         all_matrixes, seperated_matrixes = seperate_all_from_dict(matrix_profiles)
         if not ignore_all:
-            self.log_analyser.plot_multi_time_series_matrix(all_frames, all_matrixes)
+            self.log_analyser.visualise_time_series(all_frame[ALL_KEY], f"{ALL_KEY} Log Messages")
         self.log_analyser.plot_multi_time_series_matrix(seperated_frames, seperated_matrixes)
+        
+        if "ERROR" in seperated_frames.keys():
+            self.get_mismatched_frequencies(seperated_frames["ERROR"], seperated_frames["STACKTRACE"])
     
     def plot_log_types_over_time(self) -> None:
         sorted_log_type_messages: dict = self.log_analyser.get_sorted_log_types()

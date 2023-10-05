@@ -113,7 +113,7 @@ class AnalysisVisualiser():
             axs[0].plot(frequency_over_time, label=key, linestyle=chosen_line_style)
             
             matched_datetime = get_matching_datetime_range(frequency_over_time, matrix_profile)
-            axs[1].plot(matched_datetime, matrix_profile[:, 0], label=key, linestyle="--")
+            axs[1].plot(matched_datetime, matrix_profile[:, 0], label=key, linestyle=chosen_line_style)
 
             #rect = Rectangle((matched_datetime.to_list()[motif_idx], 0), window_size, 40, facecolor="lightgrey")
             #axs[0].add_patch(rect)

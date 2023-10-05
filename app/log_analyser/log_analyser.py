@@ -85,8 +85,8 @@ class LogAnalyser():
     def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:
         self.visualiser.visualise_bar_graph(graph_details, xy_array, shuffle)
     
-    def visualise_log_type_time_series(self, log_type_data_frames: dict) -> None:
-        self.visualiser.visualise_log_type_time_series(log_type_data_frames)
+    def visualise_time_series(self, data_frame, title: str) -> None:
+        self.visualiser.visualise_time_series(data_frame, title)
     
     def plot_multi_time_series_matrix(self, log_type_data_frames: dict, matrix_profiles: dict) -> None:
         print("thinking...")
