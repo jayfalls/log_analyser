@@ -12,9 +12,9 @@ import random
 
 # VARIABLES
 ## Constants
-LINE_STYLES: set = {"-", "--", "-.", ":"}
+LINE_STYLES: tuple = ("-", "--", "-.", ":")
 ## States
-available_lines: list = list(LINE_STYLES.copy())
+available_lines: list = list(LINE_STYLES)
 
 
 # HELPER FUNCTIONS
@@ -65,9 +65,12 @@ def get_matching_datetime_range(frequency_over_time, matrix_profile):
 
 ## Random Line Styles
 def reset_chosen_lines() -> None:
-    available_lines = list(LINE_STYLES.copy())
+    global available_lines
+    available_lines = list(LINE_STYLES)
 
 def get_unique_random_line() -> str:
+    if len(available_lines) == 0:
+        reset_chosen_lines()
     chosen_line_style: str = random.choice(available_lines)
     available_lines.remove(chosen_line_style)
     return chosen_line_style
