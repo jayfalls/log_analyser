@@ -54,6 +54,13 @@ class LogDatabaseAnalyser():
         return (matrix_profile, window_size)
     
     ## Freq/Time & Matrix Merged
+    def get_frequency_time(self, results: list) -> DataFrame:
+        data_frame: DataFrame = pandas.DataFrame(columns=["log_message", "date", "time"])
+        for result in results:
+            data_frame = pandas.concat([data_frame, pandas.DataFrame({"log_message": [result[0]], "date": [result[1]], "time": [result[2]]})], ignore_index=True)      
+        frequency_over_time = self.process_frequency_over_time(data_frame)
+        return frequency_over_time
+
     def get_frequency_time_matrix(self, results: list) -> tuple:
         frequency_time_matrix: list = []
         data_frame: DataFrame = pandas.DataFrame(columns=["log_message", "date", "time"])
@@ -68,6 +75,13 @@ class LogDatabaseAnalyser():
         return tuple(frequency_time_matrix)
 
     ## Dictionary Sorting
+    def plot_message_frequencies(self, sorted_messages: dict) -> dict:
+        data_frames: dict = {}
+        for key, results in sorted_messages.items():
+            frequency_over_time: DataFrame = self.get_frequency_time(results)
+            data_frames[key] = frequency_over_time
+        return data_frames
+    
     def plot_message_frequencies_matrix(self, sorted_messages: dict) -> tuple:
         data_frames: dict = {}
         matrix_profiles: dict = {}
@@ -108,28 +122,33 @@ class LogDatabaseAnalyser():
         self.log_analyser_interface.visualise_bar_graph(graph_details, source_frequencies, True)
 
     ## Time Series Graphs
-    def plot_frequency_matrix(self, sorted_messages: dict, ignore_all: bool = False) -> None:
-        data_frames, matrix_profiles = self.plot_message_frequencies_matrix(sorted_messages)
-        all_frame, seperated_frames = seperate_all_from_dict(data_frames)
+    def plot_frequency_matrix(self, sorted_type_messages: dict, sorted_source_messages: dict, ignore_all: bool = False) -> None:
+        frequency_data_frames, matrix_profiles = self.plot_message_frequencies_matrix(sorted_type_messages)
+        all_type_frame, seperated_type_frames = seperate_all_from_dict(frequency_data_frames)
         all_matrixes, seperated_matrixes = seperate_all_from_dict(matrix_profiles)
-        if not ignore_all:
-            self.log_analyser_interface.visualise_time_series(all_frame[ALL_KEY], f"{ALL_KEY} Log Messages")
-        self.log_analyser_interface.plot_multi_time_series_matrix(seperated_frames, seperated_matrixes)
+        source_data_frames: dict = self.plot_message_frequencies(sorted_source_messages)
+        graphs: dict = {
+            "Types Frequency": seperated_type_frames,
+            "Sources Frequency": source_data_frames,
+            "Matrix Profile": seperated_matrixes
+        }
         
-        if "ERROR" in seperated_frames.keys():
-            self.get_mismatched_frequencies(seperated_frames["ERROR"], seperated_frames["STACKTRACE"])
+        if not ignore_all:
+            self.log_analyser_interface.visualise_time_series(all_type_frame[ALL_KEY], f"{ALL_KEY} Log Messages")
+        self.log_analyser_interface.visualise_multi_time_series_matrix(graphs)
+        
+        if "ERROR" in seperated_type_frames.keys():
+            self.get_mismatched_frequencies(seperated_type_frames["ERROR"], seperated_type_frames["STACKTRACE"])
     
-    def plot_log_types_over_time(self) -> None:
+    def plot_log_types_sources_over_time(self) -> None:
         sorted_log_type_messages: dict = self.log_analyser_interface.get_sorted_log_types()
-        self.plot_frequency_matrix(sorted_log_type_messages)
-
-    def plot_sources_over_time(self) -> None:
         sorted_source_messages: dict = self.log_analyser_interface.get_sorted_sources()
-        self.plot_frequency_matrix(sorted_source_messages, ignore_all=True)
+        self.plot_frequency_matrix(sorted_log_type_messages, sorted_source_messages)
     
     # OUTER FUNCTION
     def analyse(self) -> None:
         self.plot_log_type_frequencies()
+        self.log_analyser_interface.show_plot()
         self.plot_source_frequencies()
-        self.plot_log_types_over_time()
-        self.plot_sources_over_time()
+        self.plot_log_types_sources_over_time()
+        self.log_analyser_interface.show_plot()

@@ -88,10 +88,13 @@ class LogAnalyserInterface():
     def visualise_time_series(self, data_frame, title: str) -> None:
         self.visualiser.visualise_time_series(data_frame, title)
     
-    def plot_multi_time_series_matrix(self, log_type_data_frames: dict, matrix_profiles: dict) -> None:
+    def visualise_multi_time_series_matrix(self, graphs: dict) -> None:
         print("thinking...")
         sys.stdout.flush()
-        self.visualiser.plot_multi_time_series_matrix(log_type_data_frames, matrix_profiles)
+        self.visualiser.visualise_multi_time_series_matrix(graphs)
+
+    def show_plot(self) -> None:
+        self.visualiser.show_plot()
     
     # OUTER FUNCTIONS
     async def import_logs(self, log_paths: set) -> None:

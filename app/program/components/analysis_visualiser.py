@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plot
+from matplotlib.pyplot import Axes
 import matplotlib.dates
 from matplotlib.patches import Rectangle
 import pandas
@@ -11,14 +12,12 @@ import random
 # VARIABLES
 ## Constants
 LINE_STYLES: tuple = ("-", "--", "-.", ":")
-
-
-# CONTROL FUNCTIONS
-def show_plot() -> None:
-    plot.show()
+## States
+chosen_lines: list = []
 
 
 # HELPER FUNCTIONS
+## List Organisation
 def organise_two_dimensional_list(two_dimensional_list: list) -> tuple:
     x_list: list = []
     y_list: list[int] = []
@@ -62,10 +61,26 @@ def get_matching_datetime_range(frequency_over_time, matrix_profile):
         return matched_datetime.append(pandas.Index([matched_datetime[-1]])) # Duplicate last index
     if matched_occurences > num_occurrences:
         return matched_datetime[:-1] # Remove last index
+
+## Random Line Styles
+def reset_chosen_lines() -> None:
+    chosen_lines = []
+
+def get_unique_random_line() -> str:
+    chosen_line_style: str = ""
+    while not chosen_line_style in chosen_lines:
+        chosen_line_style = random.choice(LINE_STYLES)
+        if not chosen_line_style in chosen_lines:
+            chosen_lines.append(chosen_line_style)
+    return chosen_line_style
     
 
 # ANALYSIS VISUALISER
 class AnalysisVisualiser():
+    # VARIABLES
+    frequency_matrix_axes: Axes
+    
+    # OUTER FUNCTIONS
     @staticmethod
     def visualise_bar_graph(graph_details: tuple, xy_list: tuple, shuffle: bool = False) -> None:
         working_list: tuple
@@ -77,50 +92,60 @@ class AnalysisVisualiser():
         plot.title(graph_details[0])
         plot.xlabel(graph_details[1])
         plot.ylabel(graph_details[2])
-        show_plot()
     
     @staticmethod
     def visualise_time_series(frequency_over_time, title) -> None:
         ax = frequency_over_time.plot()
         ax.set_title(title)
+        ax.label = ""
         ax.set_xlabel("Time")
         ax.set_ylabel("Frequency")
-    
-    # OUTER FUNCTIONS
-    def plot_multi_time_series_matrix(self, data_frames: dict, matrix_profiles: dict) -> None:
-        axs = plot.subplots(2, sharex=True, gridspec_kw={"hspace": 0})[1]
-        plot.suptitle(f"Log Message Analysis", fontsize="30")
-        axs[0].set_ylabel("Frequency", fontsize="20")
-        axs[1].set_xlabel("Time", fontsize ="20")
-        axs[1].set_ylabel("Matrix Profile", fontsize="20")
         
-        chosen_lines: list = []
-        for key, frequency_over_time in data_frames.items():
+    def add_graph_to_visualisation(self, plot_index: int, key: str, data_frame) -> None:
+        chosen_line_style: str = get_unique_random_line()
+        self.frequency_matrix_axes[plot_index].plot(data_frame, label=key, linestyle=chosen_line_style)
+
+    def visualise_time_series_matrix(self, label_name: str, frequency_over_time, matrix_profile) -> None:
+        chosen_line_style: str = get_unique_random_line()
+        self.frequency_matrix_axes[0].plot(frequency_over_time, label=label_name, linestyle=chosen_line_style)
+        matched_datetime = get_matching_datetime_range(frequency_over_time, matrix_profile)
+        self.frequency_matrix_axes[2].plot(matched_datetime, matrix_profile[:, 0], label=label_name, linestyle=chosen_line_style)
+        
+        #motif_idx = numpy.argsort(matrix_profile[:, 0])[0]
+        #nearest_neighbor_idx = matrix_profile[motif_idx, 1]
+        #rect = Rectangle((matched_datetime.to_list()[motif_idx], 0), window_size, 40, facecolor="lightgrey")
+        #self.frequency_matrix_axes[0].add_patch(rect)
+        #rect = Rectangle((matched_datetime.to_list()[nearest_neighbor_idx], 0), window_size, 40, facecolor="lightgrey")
+        #self.frequency_matrix_axes[0].add_patch(rect)
+        #self.frequency_matrix_axes[2].axvline(x=matched_datetime.to_list()[motif_idx], linestyle="dashed")
+        #self.frequency_matrix_axes[2].axvline(x=matched_datetime.to_list()[nearest_neighbor_idx], linestyle="dashed")
+
+    def visualise_multi_time_series_matrix(self, graphs: dict) -> None:
+        reset_chosen_lines()
+        num_graphs: int = len(graphs)
+        self.frequency_matrix_axes = plot.subplots(num_graphs, sharex=True, gridspec_kw={"hspace": 0})[1]
+        plot.suptitle(f"Log Message Analysis", fontsize="30")
+        for index, key in enumerate(graphs.keys()):
+            self.frequency_matrix_axes[index].set_ylabel(key, fontsize="12")
+        self.frequency_matrix_axes[-1].set_xlabel("Time", fontsize ="20")
+        
+        frequency_data_frames, source_data_frames, matrix_profiles = graphs.values()
+        
+        for key, frequency_over_time in frequency_data_frames.items():
             if not len(frequency_over_time) > 1:
                 continue
-            matrix_profile = matrix_profiles.get(key)[0]
-            window_size: int = matrix_profiles.get(key)[1]
-
-            motif_idx = numpy.argsort(matrix_profile[:, 0])[0]
-            nearest_neighbor_idx = matrix_profile[motif_idx, 1]
-            
-            chosen_line_style: str = ""
-            while not chosen_line_style in chosen_lines:
-                chosen_line_style = random.choice(LINE_STYLES)
-                if not chosen_line_style in chosen_lines:
-                    chosen_lines.append(chosen_line_style)
-
-            axs[0].plot(frequency_over_time, label=key, linestyle=chosen_line_style)
-            
-            matched_datetime = get_matching_datetime_range(frequency_over_time, matrix_profile)
-            axs[1].plot(matched_datetime, matrix_profile[:, 0], label=key, linestyle=chosen_line_style)
-
-            #rect = Rectangle((matched_datetime.to_list()[motif_idx], 0), window_size, 40, facecolor="lightgrey")
-            #axs[0].add_patch(rect)
-            #rect = Rectangle((matched_datetime.to_list()[nearest_neighbor_idx], 0), window_size, 40, facecolor="lightgrey")
-            #axs[0].add_patch(rect)
-            axs[1].axvline(x=matched_datetime.to_list()[motif_idx], linestyle="dashed")
-            axs[1].axvline(x=matched_datetime.to_list()[nearest_neighbor_idx], linestyle="dashed")
-        axs[0].legend()
-        axs[1].legend()
-        show_plot()
+            matrix_profile, _ = matrix_profiles.get(key)
+            self.visualise_time_series_matrix(key, frequency_over_time, matrix_profile)
+        reset_chosen_lines()
+        for key, source_over_time in source_data_frames.items():
+            if not len(source_over_time) > 1:
+                continue
+            self.add_graph_to_visualisation(1, key, source_over_time)  
+        
+        for axes in self.frequency_matrix_axes:
+            axes.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    
+    ## Control
+    @staticmethod
+    def show_plot() -> None:
+        plot.show()
