@@ -85,7 +85,7 @@ class LogDatabase():
     database_connection: sqlite3.Connection
     ## States
     debug_mode: bool = False
-    filters: tuple # (log_ids, (start_date, end_date), (start_time, end_time))
+    filters: tuple = () # (log_ids, (start_date, end_date), (start_time, end_time))
 
     # ERROR HANDLING
     @staticmethod
@@ -170,10 +170,10 @@ class LogDatabase():
             raise error
     
     ## Querying
-    def get_all_logs(self, filters: tuple = ()) -> tuple:
+    def get_all_logs(self) -> tuple:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
-            database_cursor.execute(f"SELECT log_type, date, time, source, message  FROM api_logs {inject_filters(filters)}GROUP BY time")
+            database_cursor.execute(f"SELECT log_type, date, time, source, message  FROM api_logs {inject_filters(self.filters)}GROUP BY time")
             results: tuple = database_cursor.fetchall()
             new_results: list = []
             for result in results:
@@ -184,10 +184,10 @@ class LogDatabase():
             raise error
             return None
 
-    def get_log_type_frequencies(self, filters: tuple = ()) -> tuple:
+    def get_log_type_frequencies(self) -> tuple:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
-            database_cursor.execute(f"SELECT log_type, COUNT(*) AS log_count FROM api_logs {inject_filters(filters)}GROUP BY log_type ORDER BY log_count ASC")
+            database_cursor.execute(f"SELECT log_type, COUNT(*) AS log_count FROM api_logs {inject_filters(self.filters)}GROUP BY log_type ORDER BY log_count ASC")
             results: tuple = database_cursor.fetchall()
             return results
         except sqlite3.Error as error:
@@ -195,19 +195,48 @@ class LogDatabase():
             raise error
             return None
     
-    def get_sorted_log_types(self, filters: tuple = ()) -> dict:
+    def get_source_frequencies(self) -> tuple:
         try:
             database_cursor: sqlite3.Cursor = self.database_connection.cursor()
-            database_cursor.execute(f"SELECT log_type, message, date, time FROM api_logs {inject_filters(filters)}ORDER BY message, date, time")
+            database_cursor.execute(f"SELECT source, COUNT(*) AS source_count FROM api_logs {inject_filters(self.filters)}GROUP BY source ORDER BY source_count ASC")
+            results: tuple = database_cursor.fetchall()
+            return results
+        except sqlite3.Error as error:
+            self.handle_sql_error(error)
+            raise error
+            return None
+    
+    def get_sorted_log_types(self) -> dict:
+        try:
+            database_cursor: sqlite3.Cursor = self.database_connection.cursor()
+            database_cursor.execute(f"SELECT log_type, message, date, time FROM api_logs {inject_filters(self.filters)}ORDER BY message, date, time")
             results: tuple = database_cursor.fetchall()
 
             log_types: dict = {}
             for result in results:
-                log_type = result[0]
+                log_type: str = result[0]
                 if log_type not in log_types:
                     log_types[log_type] = []
                 log_types[log_type].append(result[1:])
             return log_types
+        except sqlite3.Error as error:
+            self.handle_sql_error(error)
+            raise error
+            return None
+    
+    def get_sorted_sources(self) -> dict:
+        try:
+            database_cursor: sqlite3.Cursor = self.database_connection.cursor()
+            database_cursor.execute(f"SELECT source, message, date, time FROM api_logs {inject_filters(self.filters)}ORDER BY message, date, time")
+            results: tuple = database_cursor.fetchall()
+
+            sources: dict = {}
+            for result in results:
+                source: str = result[0]
+                if source not in sources:
+                    sources[source] = []
+                sources[source].append(result[1:])
+            return sources
         except sqlite3.Error as error:
             self.handle_sql_error(error)
             raise error

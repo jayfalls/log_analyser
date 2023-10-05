@@ -26,8 +26,6 @@ class LogAnalyser():
         self._debug_mode = value
         self.log_database.debug_mode = self.debug_mode
         self.log_database.initialise_database()
-    ## SQL
-    filters: tuple = ()
     
     # OBJECT CREATION & DELETION
     def __init__(self):
@@ -45,6 +43,10 @@ class LogAnalyser():
 
     # INNER FUNCTIONS
     ## Database
+    ### Variables
+    def set_filters(filters: tuple) -> None:
+        self.log_database.filters = filters
+
     ### Read/Write
     async def add_log_to_database(self, log_path: str) -> None:
         await self.extractor.log_to_database(self.log_database, log_path)
@@ -57,13 +59,19 @@ class LogAnalyser():
     
     ### Querying
     def get_logs(self) -> tuple:
-        return self.log_database.get_logs(self.filters)
+        return self.log_database.get_logs()
 
     def get_log_type_frequencies(self) -> tuple:
-        return self.log_database.get_log_type_frequencies(self.filters)
+        return self.log_database.get_log_type_frequencies()
+
+    def get_source_frequencies(self) -> tuple:
+        return self.log_database.get_source_frequencies()
 
     def get_sorted_log_types(self) -> dict:
-        return self.log_database.get_sorted_log_types(self.filters)
+        return self.log_database.get_sorted_log_types()
+    
+    def get_sorted_sources(self) -> dict:
+        return self.log_database.get_sorted_sources()
     
     ## Log To Database
     async def log_to_database(self, path_to_log: str) -> None:
@@ -71,7 +79,7 @@ class LogAnalyser():
     
     ## Log Analysis
     def analyse(self) -> tuple:
-        return self.analyser.analyse(self.filters)
+        return self.analyser.analyse()
 
     ## Analysis Visualisation
     def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:
@@ -81,6 +89,8 @@ class LogAnalyser():
         self.visualiser.visualise_log_type_time_series(log_type_data_frames)
     
     def plot_multi_time_series_matrix(self, log_type_data_frames: dict, matrix_profiles: dict) -> None:
+        print("thinking...")
+        sys.stdout.flush()
         self.visualiser.plot_multi_time_series_matrix(log_type_data_frames, matrix_profiles)
     
     # OUTER FUNCTIONS

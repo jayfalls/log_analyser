@@ -1,5 +1,4 @@
 import asyncio
-from log_analyser import log_analyser
 import pytest
 import sys
 from log_analyser.log_analyser import LogAnalyser
@@ -20,9 +19,10 @@ def create_log_analyser() -> None:
 
 def update_filters(filters: tuple) -> None:
     global log_analyser
-    log_analyser.filters = filters
+    log_analyser.set_filters(filters)
 
-# LOG ANALYSER
+
+# LOG ANALYSIS
 async def import_logs(log_paths: set) -> None:
     if log_analyser is None:
         create_log_analyser()
@@ -40,12 +40,12 @@ async def log_analyser_debug() -> None:
     test_log_path1: str = "log_analyser/.test_files/API2023_09_24.log"
     test_log_path2: str = "log_analyser/.test_files/API2023_09_27.log"
     test_log_paths: set = set()
-    #test_log_paths.add(test_log_path1)
-    test_log_paths.add(test_log_path2)
+    test_log_paths.add(test_log_path1)
+    #test_log_paths.add(test_log_path2)
 
     create_log_analyser()
     await import_logs(test_log_paths)
-    print(analyse_logs())
+    analyse_logs()
 
 
 # STARTUP
@@ -63,11 +63,10 @@ def check_if_test() -> bool:
     return False
 
 def test() -> None:
-    # Remove '-test' from the command-line arguments to prevent pytest from considering it as a test
+    # Remove "-test" from the command-line arguments to prevent pytest from considering it as a test
     sys.argv[1] = sys.argv[1].replace(" -test", "")
     # Run pytest with the specified arguments
     pytest.main(["--junitxml=testing/test_results.xml"])
-
 
 def initialize() -> None:
     if __name__ != "__main__":
