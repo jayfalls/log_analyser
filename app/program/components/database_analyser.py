@@ -4,6 +4,7 @@ from numpy import array
 import pandas
 from pandas import DataFrame
 from stumpy import stump
+import sys
 
 
 # VARIABLES
@@ -98,7 +99,8 @@ class LogDatabaseAnalyser():
             matrix_profiles[key] = matrix_profile
         return (data_frames, matrix_profiles)
     
-    # ANOMALY DETECTION
+    # ANALYSIS
+    ## Anomalies
     @staticmethod
     def get_mismatched_frequencies(data_frame1: DataFrame, data_frame2: DataFrame) -> DataFrame:
         data_frame1 = data_frame1.reset_index()
@@ -138,17 +140,25 @@ class LogDatabaseAnalyser():
         self.log_analyser_interface.visualise_multi_time_series_matrix(graphs)
         
         if "ERROR" in seperated_type_frames.keys():
-            self.get_mismatched_frequencies(seperated_type_frames["ERROR"], seperated_type_frames["STACKTRACE"])
+            self.add_insights(seperated_type_frames, seperated_matrixes)
     
     def plot_log_types_sources_over_time(self) -> None:
         sorted_log_type_messages: dict = self.log_analyser_interface.get_sorted_log_types()
         sorted_source_messages: dict = self.log_analyser_interface.get_sorted_sources()
         self.plot_frequency_matrix(sorted_log_type_messages, sorted_source_messages)
     
-    # OUTER FUNCTION
+    def add_insights(self, seperated_type_frames: DataFrame, seperated_matrixes: array) -> None:
+        insights: dict = {}
+        insights["NON MATCH ANOMALIES"] = self.get_mismatched_frequencies(seperated_type_frames["ERROR"], seperated_type_frames["STACKTRACE"])
+        self.log_analyser_interface.add_analysis_insights(insights)
+    
+    # OUTER FUNCTIONS
     def analyse(self) -> None:
+        print("thinking...")
+        sys.stdout.flush()
         self.plot_log_type_frequencies()
         self.log_analyser_interface.show_plot()
         self.plot_source_frequencies()
         self.plot_log_types_sources_over_time()
         self.log_analyser_interface.show_plot()
+        print("done thinking")

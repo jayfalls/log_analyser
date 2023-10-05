@@ -89,9 +89,10 @@ class LogAnalyserInterface():
         self.visualiser.visualise_time_series(data_frame, title)
     
     def visualise_multi_time_series_matrix(self, graphs: dict) -> None:
-        print("thinking...")
-        sys.stdout.flush()
         self.visualiser.visualise_multi_time_series_matrix(graphs)
+    
+    def add_analysis_insights(self, insights: dict) -> None:
+        self.visualiser.add_analysis_insights(insights)
 
     def show_plot(self) -> None:
         self.visualiser.show_plot()

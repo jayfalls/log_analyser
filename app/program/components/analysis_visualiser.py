@@ -4,6 +4,7 @@ from matplotlib.pyplot import Axes
 import matplotlib.dates
 from matplotlib.patches import Rectangle
 import pandas
+from pandas import DataFrame
 from pandas.tseries.frequencies import to_offset
 import numpy
 import random
@@ -11,9 +12,9 @@ import random
 
 # VARIABLES
 ## Constants
-LINE_STYLES: tuple = ("-", "--", "-.", ":")
+LINE_STYLES: set = {"-", "--", "-.", ":"}
 ## States
-chosen_lines: list = []
+available_lines: list = list(LINE_STYLES.copy())
 
 
 # HELPER FUNCTIONS
@@ -64,14 +65,11 @@ def get_matching_datetime_range(frequency_over_time, matrix_profile):
 
 ## Random Line Styles
 def reset_chosen_lines() -> None:
-    chosen_lines = []
+    available_lines = list(LINE_STYLES.copy())
 
 def get_unique_random_line() -> str:
-    chosen_line_style: str = ""
-    while not chosen_line_style in chosen_lines:
-        chosen_line_style = random.choice(LINE_STYLES)
-        if not chosen_line_style in chosen_lines:
-            chosen_lines.append(chosen_line_style)
+    chosen_line_style: str = random.choice(available_lines)
+    available_lines.remove(chosen_line_style)
     return chosen_line_style
     
 
@@ -80,6 +78,12 @@ class AnalysisVisualiser():
     # VARIABLES
     frequency_matrix_axes: Axes
     
+    # INNER FUNCTIONS
+    def add_non_matching_anomalies(self, insight: DataFrame) -> None:
+        for x_value in insight.index:
+            self.frequency_matrix_axes[0].plot(x_value, 2, marker="v", markersize=8, color="b")
+            self.frequency_matrix_axes[0].text(x_value, 2.2, "Unique Occurence", color="black", fontsize=8)
+
     # OUTER FUNCTIONS
     @staticmethod
     def visualise_bar_graph(graph_details: tuple, xy_list: tuple, shuffle: bool = False) -> None:
@@ -143,7 +147,12 @@ class AnalysisVisualiser():
             self.add_graph_to_visualisation(1, key, source_over_time)  
         
         for axes in self.frequency_matrix_axes:
-            axes.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+            axes.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    
+    def add_analysis_insights(self, insights: dict) -> None:
+        for key, insight in insights.items():
+            if key == "NON MATCH ANOMALIES":
+                self.add_non_matching_anomalies(insight)
     
     ## Control
     @staticmethod
