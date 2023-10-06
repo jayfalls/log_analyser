@@ -39,7 +39,7 @@ class LogDatabaseAnalyser():
     all_matrix_profile: array
     ## Analysis
     ### Patterns
-    matching_graph_percent: int = 90 # The percent that two graphs need to be the same to be considered matching
+    matching_graph_percent: int = 95 # The percent that two graphs need to be the same to be considered matching
     ### Anomalies
     matrix_anomaly_threshold_percent: int = 95
     matrix_anomaly_threshold: float = 0
@@ -188,6 +188,11 @@ class LogDatabaseAnalyser():
         graph_details: tuple = ("Source Frequency", "SOURCE", "OCCURENCES")
         self.log_analyser_interface.visualise_bar_graph(graph_details, source_frequencies, True)
 
+    ## Histogram
+    def plot_log_type_histo(self) -> None:
+        log_type_frequencies: tuple = self.log_analyser_interface.get_log_type_frequencies()
+        self.log_analyser_interface.visualise_histogram(log_type_frequencies[1])
+
     ## Time Series Graphs
     def plot_frequency_matrix(self, sorted_type_messages: dict, sorted_source_messages: dict, ignore_all: bool = False) -> None:
         frequency_data_frames, matrix_profiles = self.plot_message_frequencies_matrix(sorted_type_messages)
@@ -232,6 +237,8 @@ class LogDatabaseAnalyser():
         print("thinking...")
         sys.stdout.flush()
         self.plot_log_type_frequencies()
+        self.log_analyser_interface.show_plot()
+        #self.plot_log_type_histo()
         self.log_analyser_interface.show_plot()
         self.plot_source_frequencies()
         self.plot_log_types_sources_over_time()

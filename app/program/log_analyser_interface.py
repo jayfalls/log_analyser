@@ -87,6 +87,9 @@ class LogAnalyserInterface():
     def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:
         self.visualiser.visualise_bar_graph(graph_details, xy_array, shuffle)
     
+    def visualise_histogram(self, values: tuple) -> None:
+        self.visualiser.visualise_histogram(values)
+    
     def visualise_time_series(self, data_frame, title: str) -> None:
         self.visualiser.visualise_time_series(data_frame, title)
     
@@ -121,3 +124,27 @@ class LogAnalyserInterface():
     def clear_database(self) -> None:
         self.log_database.initialise_database()
         self.log_database.clear_database()
+    
+    def get_time_interval(self) -> int:
+        return self.analyser.time_interval_minutes
+    
+    def get_window_modifier(self) -> int:
+        return self.analyser.matrix_window_modifier
+    
+    def get_match_percent(self) -> int:
+        return self.analyser.matching_graph_percent
+    
+    def get_threshold_percent(self) -> int:
+        return self.analyser.matrix_anomaly_threshold_percent
+
+    def update_time_interval(self, time_interval: int) -> None:
+        self.analyser.time_interval_minutes = time_interval
+    
+    def update_window_modifier(self, window_modifier: int) -> None:
+        self.analyser.matrix_window_modifier = window_modifier
+    
+    def update_match_percent(self, match_percent: int) -> None:
+        self.analyser.matching_graph_percent = match_percent
+    
+    def update_threshold_percent(self, threshold_percent: int) -> None:
+        self.analyser.matrix_anomaly_threshold_percent = threshold_percent

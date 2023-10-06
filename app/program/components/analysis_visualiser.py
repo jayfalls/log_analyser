@@ -167,8 +167,7 @@ class AnalysisVisualiser():
             self.frequency_matrix_axes[0].text(time, frequency + TEXT_ABOVE_DISTANCE, "Threshold Anomaly", color="red", fontsize=TEXT_ABOVE_SIZE)
 
     # OUTER FUNCTIONS
-    @staticmethod
-    def visualise_bar_graph(graph_details: tuple, xy_list: tuple, shuffle: bool = False) -> None:
+    def visualise_bar_graph(self, graph_details: tuple, xy_list: tuple, shuffle: bool = False) -> None:
         working_list: tuple
         if shuffle:
             working_list = organise_two_dimensional_list(xy_list)
@@ -179,6 +178,13 @@ class AnalysisVisualiser():
         plot.xlabel(graph_details[1])
         plot.ylabel(graph_details[2])
     
+    ## Histogram
+    def visualise_histogram(self, values) -> None:
+        plot.hist(values, bins=3)
+        plot.xlabel('Frequency')
+        plot.ylabel('Count')
+        plot.title('Frequency Histogram')
+
     ## Time Series  
     def visualise_time_series(self, frequency_over_time, title) -> None:
         self.all_frequency_over_time = frequency_over_time
