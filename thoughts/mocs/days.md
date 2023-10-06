@@ -17,3 +17,4 @@
 - [Tuesday](../days/03Oct2023.md)
 - [Wednesday](../days/04Oct2023.md)
 - [Thursday](../days/05Oct2023.md)
+- [Friday](../days/06Oct2023.md)

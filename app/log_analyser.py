@@ -1,51 +1,36 @@
-import asyncio
 import pytest
 import sys
+import tkinter
 from program.log_analyser_interface import LogAnalyserInterface
+from gui.gui import GUI
 
 
 # VARIABLES
 ## References
 interface: LogAnalyserInterface = None
+gui: GUI
 ## States
 debug_mode: bool = False
 
 
-# TOOL CREATION / MODIFICATION
+# CREATION / MODIFICATION
 def create_interface() -> None:
     global interface
     interface = LogAnalyserInterface()
     interface.debug_mode = debug_mode
 
+def create_gui() -> None:
+    global gui
+    gui = GUI(interface)
+
 def update_filters(filters: tuple) -> None:
     global interface
     interface.set_filters(filters)
 
-
-# LOG ANALYSIS
-async def import_logs(log_paths: set) -> None:
-    if interface is None:
-        create_interface()
-    await interface.import_logs(log_paths) 
-
-def analyse_logs(filters: tuple = ()) -> tuple:
-    if interface is None:
-        create_interface()
-    return interface.analyse()
-
-
-# DEBUGGING
-async def interface_debug() -> None:
-    # DEBUG VARIABLES
-    test_log_path1: str = "program/.test_files/API2023_09_24.log"
-    test_log_path2: str = "program/.test_files/API2023_09_27.log"
-    test_log_paths: set = set()
-    #test_log_paths.add(test_log_path1)
-    test_log_paths.add(test_log_path2)
-
+# PROGRAM
+def start_program() -> None:
     create_interface()
-    await import_logs(test_log_paths)
-    analyse_logs()
+    create_gui()
 
 
 # INITIALISATION
@@ -72,11 +57,12 @@ def initialize() -> None:
     if __name__ != "__main__":
         return
     if len(sys.argv) == 1: # No arguments
+        start_program()
         return
     if not check_if_debug():
         return
     if not check_if_test():
-        asyncio.run(interface_debug())
+        start_program()
         return
     test()
 

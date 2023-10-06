@@ -29,9 +29,20 @@ class LogDatabaseAnalyser():
     # VARIABLES
     ## References
     # | log_analyser_interface | Must be assigned by log_analyser_interface
-    ## States
-    time_interval_minutes: int = 2
-    matrix_window_modifier: int = 20
+    ## Tuning
+    time_interval_minutes: int = 2 # How long time series should be measured in
+    matrix_window_modifier: int = 20 # What fraction the matrix profile segments should be split into
+    ## Results
+    all_type_frame: DataFrame
+    seperated_type_frames: dict = {}
+    seperated_matrixes: dict = {}
+    all_matrix_profile: array
+    ## Analysis
+    ### Patterns
+    matching_graph_percent: int = 90 # The percent that two graphs need to be the same to be considered matching
+    ### Anomalies
+    matrix_anomaly_threshold_percent: int = 95
+    matrix_anomaly_threshold: float = 0
 
     # TIME SERIES
     ## Frequency Over Time
@@ -94,15 +105,54 @@ class LogDatabaseAnalyser():
                 continue
             frequency_over_time, matrix_profile = frequency_time_matrix
             data_frames[key] = frequency_over_time
-            if key == ALL_KEY:
-                continue
             matrix_profiles[key] = matrix_profile
         return (data_frames, matrix_profiles)
     
+    ## Hourly Freq
+    def get_hourly_frequencies(self) -> DataFrame:
+        hourly_avg: DataFrame = self.all_type_frame.resample("H").sum()
+        return hourly_avg
+    
     # ANALYSIS
+    ## Patterns
+    def get_matching_graphs(self) -> list[tuple]:
+        matching_names: list[tuple] = []
+        # Get the list of dataframe names
+        graph_names: list[str] = list(self.seperated_type_frames.keys())
+        already_matched_names: list = []
+        # Perform two-way comparison for each pair of dataframes
+        for index in range(len(graph_names)):
+            for secondary_index in range(len(graph_names)):
+                if index == secondary_index:
+                    continue
+                graph1_name = graph_names[index]
+                graph2_name = graph_names[secondary_index]
+                graph1 = self.seperated_type_frames[graph1_name]
+                graph2 = self.seperated_type_frames[graph2_name]
+                # Calculate the number of matching values
+                matching_values = (graph1['frequency'] == graph2['frequency']).sum()
+                # Calculate the percentage of matching values
+                percentage_matched: float = matching_values / len(graph1) * 100
+                # Check if the percentage exceeds the threshold
+                if percentage_matched > self.matching_graph_percent:
+                    combined_names: str = graph1_name + graph2_name
+                    reverse_combined_names: str = graph2_name + graph1_name
+                    if combined_names in already_matched_names:
+                        continue
+                    already_matched_names.append(combined_names)
+                    already_matched_names.append(reverse_combined_names)
+                    matching_names.append((graph1_name, graph2_name, percentage_matched))
+        return matching_names
+
+    def get_matching_motif_indices(self) -> None:
+        matrix_profile = self.all_matrix_profile[:, 0]
+        motif: float = numpy.argmin(matrix_profile)
+        matching_indices = numpy.where(matrix_profile == motif)
+        print(matching_indices)
+
     ## Anomalies
     @staticmethod
-    def get_mismatched_frequencies(data_frame1: DataFrame, data_frame2: DataFrame) -> DataFrame:
+    def get_mismatched_ocurrences(data_frame1: DataFrame, data_frame2: DataFrame) -> DataFrame:
         data_frame1 = data_frame1.reset_index()
         data_frame2 = data_frame2.reset_index()
         merged_data_frame: DataFrame = pandas.merge(data_frame1, data_frame2, on="datetime", how="outer", suffixes=("_1", "_2"))
@@ -110,6 +160,21 @@ class LogDatabaseAnalyser():
         mismatch_data_frame: DataFrame = merged_data_frame[merged_data_frame["mismatch"]][["datetime", "mismatch"]] # Only returns collums where the collum "mismatch" contains true
         mismatch_data_frame = mismatch_data_frame.set_index("datetime")
         return mismatch_data_frame
+    
+    def calculate_threshold(self, matrix_profile) -> None:
+        first_column = matrix_profile[:, 0]
+        highest_value: float = numpy.max(first_column)
+        threshold: float = highest_value * self.matrix_anomaly_threshold_percent  / 100
+        self.matrix_anomaly_threshold = threshold
+
+    def get_anomaly_indexes_above_threshold(self, matrix_profile) -> array:
+        self.calculate_threshold(matrix_profile)
+        first_column = matrix_profile[:, 0]
+        above_threshold_indices: array = numpy.where(first_column > self.matrix_anomaly_threshold)
+        return above_threshold_indices[0]
+    
+    ## Temporal Trends
+    
 
     # VISUALISATION
     ## Bar Graphs
@@ -126,31 +191,41 @@ class LogDatabaseAnalyser():
     ## Time Series Graphs
     def plot_frequency_matrix(self, sorted_type_messages: dict, sorted_source_messages: dict, ignore_all: bool = False) -> None:
         frequency_data_frames, matrix_profiles = self.plot_message_frequencies_matrix(sorted_type_messages)
-        all_type_frame, seperated_type_frames = seperate_all_from_dict(frequency_data_frames)
-        all_matrixes, seperated_matrixes = seperate_all_from_dict(matrix_profiles)
+        all_type_frame, self.seperated_type_frames = seperate_all_from_dict(frequency_data_frames)
+        self.all_type_frame = all_type_frame[ALL_KEY]
+        all_matrixes, self.seperated_matrixes = seperate_all_from_dict(matrix_profiles)
+        self.all_matrix_profile = all_matrixes[ALL_KEY][0]
         source_data_frames: dict = self.plot_message_frequencies(sorted_source_messages)
+        hourly_frequencies: DataFrame = self.get_hourly_frequencies()
         graphs: dict = {
-            "Types Frequency": seperated_type_frames,
+            "Types Frequency": self.seperated_type_frames,
             "Sources Frequency": source_data_frames,
-            "Matrix Profile": seperated_matrixes
+            "Matrix Profile": self.seperated_matrixes,
+            "Hourly Frequency": hourly_frequencies
         }
-        
         if not ignore_all:
-            self.log_analyser_interface.visualise_time_series(all_type_frame[ALL_KEY], f"{ALL_KEY} Log Messages")
+            self.log_analyser_interface.visualise_time_series(self.all_type_frame, f"{ALL_KEY} Log Messages")
         self.log_analyser_interface.visualise_multi_time_series_matrix(graphs)
-        
-        if "ERROR" in seperated_type_frames.keys():
-            self.add_insights(seperated_type_frames, seperated_matrixes)
-    
+            
     def plot_log_types_sources_over_time(self) -> None:
         sorted_log_type_messages: dict = self.log_analyser_interface.get_sorted_log_types()
         sorted_source_messages: dict = self.log_analyser_interface.get_sorted_sources()
         self.plot_frequency_matrix(sorted_log_type_messages, sorted_source_messages)
     
-    def add_insights(self, seperated_type_frames: DataFrame, seperated_matrixes: array) -> None:
+    def plot_insights(self) -> None:
         insights: dict = {}
-        insights["NON MATCH ANOMALIES"] = self.get_mismatched_frequencies(seperated_type_frames["ERROR"], seperated_type_frames["STACKTRACE"])
+        matching_graphs: list[tuple] = self.get_matching_graphs()
+        if matching_graphs != []:
+            insights["PERCENT_MATCHED"] = matching_graphs
+            non_match_anomalies: list = []
+            for name1, name2, _ in matching_graphs:
+                non_match_anomalies.append(self.get_mismatched_ocurrences(self.seperated_type_frames[name1], self.seperated_type_frames[name2]))
+            insights["NON_MATCH_ANOMALIES"] = non_match_anomalies
+        threshold_anomaly_indexes: array = self.get_anomaly_indexes_above_threshold(self.seperated_matrixes["ERROR"][0])
+        threshold_anomalies: tuple = (self.matrix_anomaly_threshold, threshold_anomaly_indexes)
+        insights["THRESHOLD_ANOMALIES"] = threshold_anomalies
         self.log_analyser_interface.add_analysis_insights(insights)
+        self.get_matching_motif_indices()
     
     # OUTER FUNCTIONS
     def analyse(self) -> None:
@@ -160,5 +235,6 @@ class LogDatabaseAnalyser():
         self.log_analyser_interface.show_plot()
         self.plot_source_frequencies()
         self.plot_log_types_sources_over_time()
+        self.plot_insights()
         self.log_analyser_interface.show_plot()
         print("done thinking")
