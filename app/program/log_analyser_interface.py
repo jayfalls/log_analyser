@@ -16,6 +16,7 @@ class LogAnalyserInterface():
     analyser: LogDatabaseAnalyser
     visualiser: AnalysisVisualiser
     ## States
+    analysing: bool = False
     _debug_mode: bool = False
     ### State Changes
     @property
@@ -25,7 +26,6 @@ class LogAnalyserInterface():
     def debug_mode(self, value):
         self._debug_mode = value
         self.log_database.debug_mode = self.debug_mode
-        self.log_database.initialise_database()
     
     # OBJECT CREATION & DELETION
     def __init__(self):
@@ -42,7 +42,13 @@ class LogAnalyserInterface():
         self.log_database.close_database()
 
     # INNER FUNCTIONS
+    def done_analysing(self) -> None:
+        self.analysing = False
+
     ## Database
+    def does_database_exist(self) -> bool:
+        return self.log_database.does_database_exist()
+
     ### Variables
     def set_filters(filters: tuple) -> None:
         self.log_database.filters = filters
@@ -76,10 +82,6 @@ class LogAnalyserInterface():
     ## Log To Database
     async def log_to_database(self, path_to_log: str) -> None:
         await self.extractor.log_to_database(self, path_to_log)
-    
-    ## Log Analysis
-    def analyse(self) -> tuple:
-        return self.analyser.analyse()
 
     ## Analysis Visualisation
     def visualise_bar_graph(self, graph_details: tuple, xy_array: tuple, shuffle: bool = False) -> None:
@@ -99,6 +101,7 @@ class LogAnalyserInterface():
     
     # OUTER FUNCTIONS
     async def import_logs(self, log_paths: set) -> None:
+        self.log_database.initialise_database()
         if not log_paths:
             return
         if len(log_paths) == 1:
@@ -109,3 +112,12 @@ class LogAnalyserInterface():
                 task: asyncio.Task = asyncio.create_task(self.log_to_database(log_path))
                 load_tasks.append(task)
             await load_tasks[-1]
+
+    def analyse(self) -> None:
+        self.log_database.initialise_database()
+        self.analysing = True
+        self.analyser.analyse()
+
+    def clear_database(self) -> None:
+        self.log_database.initialise_database()
+        self.log_database.clear_database()

@@ -99,13 +99,19 @@ class LogDatabase():
             print("An error occurred while initializing the database:", error_message)
 
     # DATABASE
+    def get_path(self) -> str:
+        if self.debug_mode:
+            return DEBUG_DATABASE_PATH
+        else:
+            return DATABASE_PATH
+    
+    def does_database_exist(self) -> bool:
+        database_path: str = self.get_path()
+        return os.path.exists(database_path)
+        
     ## Access
     def initialise_database(self) -> None:
-        database_path: str = ""
-        if self.debug_mode:
-            database_path = DEBUG_DATABASE_PATH
-        else:
-            database_path = DATABASE_PATH
+        database_path: str = self.get_path()
         try:
             # Use context manager to automatically close the connection
             with sqlite3.connect(database_path) as new_database_connection:
@@ -128,6 +134,15 @@ class LogDatabase():
         except sqlite3.Error as error:
             self.handle_sql_error(error)
             raise error
+    
+    def clear_database(self) -> None:
+        self.close_database()
+        database_path: str = self.get_path()
+        try:
+            os.remove(database_path)
+            print(f"Database '{database_path}' deleted successfully.")
+        except OSError as e:
+            print(f"Error deleting file '{database_path}': {str(e)}")
 
     def commit_to_database(self) -> None:
         try:

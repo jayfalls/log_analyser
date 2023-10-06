@@ -148,7 +148,7 @@ class LogDatabaseAnalyser():
         matrix_profile = self.all_matrix_profile[:, 0]
         motif: float = numpy.argmin(matrix_profile)
         matching_indices = numpy.where(matrix_profile == motif)
-        print(matching_indices)
+        #print(matching_indices)
 
     ## Anomalies
     @staticmethod
@@ -238,3 +238,4 @@ class LogDatabaseAnalyser():
         self.plot_insights()
         self.log_analyser_interface.show_plot()
         print("done thinking")
+        self.log_analyser_interface.done_analysing()
