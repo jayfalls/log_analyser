@@ -11,3 +11,11 @@
 ## Implement More Possible Solutions
 
 - To allow the program to be more comprehensive, multiple solutions can be implemented side-by-side to provide more information
+
+## Dive Deeper
+
+- Add the ability to preview the individual log files when selecting the time graph
+
+## Natural Language Sentiments
+
+- Use a LLM to query the findings and gather unique insights through natural language
