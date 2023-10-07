@@ -31,7 +31,7 @@ class LogDatabaseAnalyser():
     # | log_analyser_interface | Must be assigned by log_analyser_interface
     ## Tuning
     time_interval_minutes: int = 2 # How long time series should be measured in
-    matrix_window_modifier: int = 15 # What fraction the matrix profile segments should be split into
+    matrix_window_modifier: int = 20 # What fraction the matrix profile segments should be split into
     ## Results
     all_type_frame: DataFrame
     seperated_type_frames: dict = {}
@@ -39,9 +39,9 @@ class LogDatabaseAnalyser():
     all_matrix_profile: array
     ## Analysis
     ### Patterns
-    matching_graph_percent: int = 100 # The percent that two graphs need to be the same to be considered matching
+    matching_graph_percent: int = 95 # The percent that two graphs need to be the same to be considered matching
     ### Anomalies
-    matrix_anomaly_threshold_percent: int = 98
+    matrix_anomaly_threshold_percent: int = 95
     matrix_anomaly_threshold: float = 0
 
     # TIME SERIES
@@ -119,7 +119,6 @@ class LogDatabaseAnalyser():
         matching_names: list[tuple] = []
         # Get the list of dataframe names
         graph_names: list[str] = list(self.seperated_type_frames.keys())
-        print(self.seperated_type_frames)
         already_matched_names: list = []
         # Perform two-way comparison for each pair of dataframes
         for index in range(len(graph_names)):
@@ -206,8 +205,8 @@ class LogDatabaseAnalyser():
         graphs: dict = {
             "Types Frequency": self.seperated_type_frames,
             "Sources Frequency": source_data_frames,
-            "Matrix Profile": self.seperated_matrixes,
-            "Hourly Frequency": hourly_frequencies
+            "Hourly Frequency": hourly_frequencies,
+            "Matrix Profile": self.seperated_matrixes
         }
         if not ignore_all:
             self.log_analyser_interface.visualise_time_series(self.all_type_frame, f"{ALL_KEY} Log Messages")

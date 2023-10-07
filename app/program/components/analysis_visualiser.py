@@ -19,7 +19,9 @@ TEXT_ABOVE_DISTANCE: float = 0.2
 TEXT_ABOVE_SIZE: int = 6
 ## States
 available_lines: list = list(LINE_STYLES)
-
+## Plot Look
+plot.left = 0.055
+plot.right = 0.798
 
 # HELPER FUNCTIONS
 ## List Organisation
@@ -211,7 +213,7 @@ class AnalysisVisualiser():
         self.frequency_matrix_axes[-1].set_xlabel("Time", fontsize ="20")
 
     def plot_graphs(self, graphs: dict) -> None:
-        frequency_data_frames, source_data_frames, matrix_profiles, hourly_averages = graphs.values()
+        frequency_data_frames, source_data_frames, hourly_averages, matrix_profiles = graphs.values()
         for key, frequency_over_time in frequency_data_frames.items():
             if not len(frequency_over_time) > 1:
                 continue
