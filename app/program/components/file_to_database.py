@@ -54,8 +54,8 @@ class LogToDatabase():
     def extract_log_line(log_line: str) -> dict:
         items: list = log_line.split(" | ")
 
-        if len(items) != 5:
-            return None
+        if len(items) < 5:
+            return
         for item in items:
             if is_string_empty_or_whitespace(item):
                 return None

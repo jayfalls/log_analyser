@@ -2,7 +2,7 @@
 
 ##### related:: [SENTIMENTS](./sentiments.md)
 
-# 📆 Days
+# 🗓️ Days
 
 ## Week 1
 
@@ -18,3 +18,4 @@
 - [Wednesday](../days/04Oct2023.md)
 - [Thursday](../days/05Oct2023.md)
 - [Friday](../days/06Oct2023.md)
+- [Saturday](../days/07Oct2023.md)
